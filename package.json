@@ -1,0 +1,25 @@
+{
+  "name": "swift",
+  "title": "Swift Map",
+  "description": "Swift Map JavaScript Client",
+  "version": "1.0.0",
+  "homepage": "https://github.com/albburtsev/swift",
+  "author": {
+    "name": "Alexander Burtsev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://albburtsev@github.com/albburtsev/swift.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/albburtsev/swift/license.md"
+    }
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": ">=0.3.9"
+  },
+  "keywords": []
+}
