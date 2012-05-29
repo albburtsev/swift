@@ -4,8 +4,37 @@
 	'use strict';
 
 	/**
-	 * Class, that inherits classes with events handling
-	 * @constructor
+	 * @namespace
+	 * @ignore
+	 */
+	var	utils = {
+		/** @ignore */
+		mixin: function() {
+			var	target = arguments[0],
+				i, j;
+
+			if ( arguments.length <= 1 )
+				return target;
+
+			for (i = 1; i < arguments.length; i++)
+				for (j in arguments[i])
+					if ( arguments[i].hasOwnProperty(j) )
+						target[j] = arguments[i][j];
+			return target;
+		},
+		/** @ignore */
+		extend: function(parent, child, proto) {
+			function F() {};
+			F.prototype = parent.prototype;
+			child.prototype = new F();
+			child.prototype.constructor = child;
+			utils.mixin(child.prototype, proto);
+		}
+	};
+	/**
+	 * Event handling abstract class
+	 * @class
+	 * @name EventCover
 	 * @since 0.0.1
 	 * @example
 // Class Map inherits from EventCover all methods
@@ -53,8 +82,59 @@ map.on('click', function(e) {
 		}
 	};
 	/**
-	 * Create a new Map
-	 * @constructor
+	 * Create a new point instance with geographic coordinates
+	 * @class
+	 * @name Point
+	 * @since 0.0.1
+	 * @param {Number} lon Value of the longitude **Required**
+	 * @param {Number} lat Value of the latitude **Required**
+	 * @example
+new Point(37.6, 55.8);
+// or
+Point(37.6, 55.8);
+	 */
+	function Point(lon, lat) {
+		if ( !(this instanceof Point) )
+			return new Point(lon, lat);
+		// todo
+	};
+
+	Point.prototype = {
+		/**
+		 * Measure a distance between current point and point from argument
+		 * @since 0.0.1
+		 * @param {Point} point Second point for measuring. **Required**
+		 * @returns {Number} Returns distance in meters
+		 */
+		distance: function(point) {
+			
+		},
+		/**
+		 * Set a new longitude, or return current longitude
+		 * @since 0.0.1
+		 * @param {Number} lon Value of the longitude. *Optional*
+		 * @returns {Point} Returns point object, if the parameter not passed
+		 * @returns {Number} Returns value of the longitude, if the parameter passed
+		 */
+		lon: function(lon) {
+			// todo
+		},
+		/**
+		 * Set a new latitude, or return current latitude
+		 * @since 0.0.1
+		 * @param {Number} lat Value of the latitude. *Optional*
+		 * @returns {Point} Returns point object, if the parameter not passed
+		 * @returns {Number} Returns value of the latitude, if the parameter passed
+		 */
+		lat: function(lat) {
+			// todo
+		}
+	};
+	/**
+	 * Create a new map instance
+	 * @class
+	 * @name Map
+	 * @augments EventCover
 	 * @since 0.0.1
 	 * @param {HTMLElement} node HTML element for map placement. **Required**
 	 * @param {Object} opts Map options. *Optional*
@@ -77,13 +157,15 @@ swift.Map(document.body, {
 		// todo
 	};
 
-	Map.prototype = {
+	utils.extend(EventCover, Map,
+	/** @lends Map.prototype */
+	{
 		/**
 		 * Set center of the map, or return center
 		 * @since 0.0.1
 		 * @param {Point} center Center of the map. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Point} Returned center of the map, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Point} Returns center of the map, if the parameter passed
 		 */
 		center: function(center) {
 			// todo
@@ -92,8 +174,8 @@ swift.Map(document.body, {
 		 * Set bounds of the map, or return bounds
 		 * @since 0.0.1
 		 * @param {Bounds} bounds Bounds object. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Bounds} Returned bounds of the map, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Bounds} Returns bounds of the map, if the parameter passed
 		 */
 		bounds: function(bounds) {
 			// todo
@@ -101,7 +183,7 @@ swift.Map(document.body, {
 		/**
 		 * Remove map object and all DOM elements of map
 		 * @since 0.0.1
-		 * @returns {Boolean} Returned true, if removing was successfull
+		 * @returns {Boolean} Returns true, if removing was successfull
 		 */
 		remove: function() {
 			// todo
@@ -110,8 +192,8 @@ swift.Map(document.body, {
 		 * Set zoom of the map, or return zoom level
 		 * @since 0.0.1
 		 * @param {Number} zoom Zoom level of the map. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Number} Returned number of zoom level, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Number} Returns number of zoom level, if the parameter passed
 		 */
 		zoom: function(zoom) {
 			// todo
@@ -119,7 +201,7 @@ swift.Map(document.body, {
 		/**
 		 * Increased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		zoomIn: function() {
 			// todo
@@ -127,7 +209,7 @@ swift.Map(document.body, {
 		/**
 		 * Decreased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		zoomOut: function() {
 			// todo
@@ -145,18 +227,26 @@ swift.Map(document.body, {
 		 * Update map options
 		 * @since 0.0.1
 		 * @param {Object} opts Map options. *Optional*
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		update: function(opts) {
 			// todo
+		},
+		
+		// + + + + + Ignored methods + + + + +
+		
+		/** @ignore */
+		init: function() {
+			
 		}
-	};
+	});
 
 	/**
 	 * @namespace
 	 */
 	var swift = {
 		EventCover: EventCover,
+		Point: Point,
 		Map: Map,
 
 		/**

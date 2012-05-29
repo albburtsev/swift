@@ -8,7 +8,9 @@ module.exports = function(grunt) {
 			source: {
 				src: [
 					'js/src/_header.js',
+					'js/src/ns.utils.js',
 					'js/src/class.event-cover.js',
+					'js/src/class.point.js',
 					'js/src/class.map.js',
 					'js/src/_footer.js',
 				],

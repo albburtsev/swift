@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru-RU">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>qUnit Tests</title>
+		<link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" />
+		<script src="../js/swift.js"></script>
+		<script src="http://code.jquery.com/jquery-latest.js"></script>
+		<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+		<script>
+		$(function() {
+			var	_mymap = $('#mymap').css({
+				width: 1,
+				height: 1,
+				visibility: 'hidden'
+			});
+
+			test('Namespace swift', function() {
+				ok( !!window.swift, 'Namespace swift exist' );
+				ok( swift.ns instanceof Function, 'Method swift.ns() exist' );
+			});
+
+			test('Class Point', function() {
+				ok( swift.Point instanceof Function, 'Class Point exist' );
+				ok( new swift.Point(0, 0) instanceof swift.Point, 'Constructor successful called with "new"' );
+				ok( swift.Point(0, 0) instanceof swift.Point, 'Constructor successful called without "new"' );
+
+				var	point = swift.Point(0, 0);
+				ok( point.lon instanceof Function, 'Method lon() exist' );
+				ok( point.lat instanceof Function, 'Method lat() exist' );
+				ok( point.distance instanceof Function, 'Method distance() exist' );
+				/*
+				var	lon = 1.11,
+					lat = 2.22,
+					point = swift.Point(lon, lat);
+
+				strictEqual(point.lon(), lon, 'Method lon() worked correctly');
+				strictEqual(point.lat(), lat, 'Method lat() worked correctly');
+				*/
+			});
+
+			test('Class Map', function() {
+				ok( swift.Map instanceof Function, 'Class Map exist' );
+				ok( new swift.Map(_mymap.get(0)) instanceof swift.Map, 'Constructor successful called with "new"' );
+				ok( swift.Map(_mymap.get(0)) instanceof swift.Map, 'Constructor successful called without "new"' );
+				ok( swift.Map(_mymap.get(0)) instanceof swift.EventCover, 'Successful class EventCover inherits' );
+
+				/*
+				var	mymap = new swift.Map( _mymap.get(0) );
+				ok( mymap.center() instanceof swift.Point, 'mymap.center()' );
+				*/
+			});
+		});
+		</script>
+	</head>
+	<body>
+		<h1 id="qunit-header">QUnit example</h1>
+
+		<h2 id="qunit-banner"></h2>
+		<div id="qunit-testrunner-toolbar"></div>
+
+		<h2 id="qunit-userAgent"></h2>
+		<ol id="qunit-tests"></ol>
+
+		<div id="qunit-fixture">test markup, will be hidden</div>
+		
+		<div id="mymap"></div>
+	</body>
+</html>

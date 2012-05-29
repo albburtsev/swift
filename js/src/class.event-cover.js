@@ -1,6 +1,7 @@
 	/**
-	 * Class, that inherits classes with events handling
-	 * @constructor
+	 * Event handling abstract class
+	 * @class
+	 * @name EventCover
 	 * @since 0.0.1
 	 * @example
 // Class Map inherits from EventCover all methods

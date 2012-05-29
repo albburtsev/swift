@@ -1,6 +1,8 @@
 	/**
-	 * Create a new Map
-	 * @constructor
+	 * Create a new map instance
+	 * @class
+	 * @name Map
+	 * @augments EventCover
 	 * @since 0.0.1
 	 * @param {HTMLElement} node HTML element for map placement. **Required**
 	 * @param {Object} opts Map options. *Optional*
@@ -23,13 +25,15 @@ swift.Map(document.body, {
 		// todo
 	};
 
-	Map.prototype = {
+	utils.extend(EventCover, Map,
+	/** @lends Map.prototype */
+	{
 		/**
 		 * Set center of the map, or return center
 		 * @since 0.0.1
 		 * @param {Point} center Center of the map. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Point} Returned center of the map, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Point} Returns center of the map, if the parameter passed
 		 */
 		center: function(center) {
 			// todo
@@ -38,8 +42,8 @@ swift.Map(document.body, {
 		 * Set bounds of the map, or return bounds
 		 * @since 0.0.1
 		 * @param {Bounds} bounds Bounds object. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Bounds} Returned bounds of the map, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Bounds} Returns bounds of the map, if the parameter passed
 		 */
 		bounds: function(bounds) {
 			// todo
@@ -47,7 +51,7 @@ swift.Map(document.body, {
 		/**
 		 * Remove map object and all DOM elements of map
 		 * @since 0.0.1
-		 * @returns {Boolean} Returned true, if removing was successfull
+		 * @returns {Boolean} Returns true, if removing was successfull
 		 */
 		remove: function() {
 			// todo
@@ -56,8 +60,8 @@ swift.Map(document.body, {
 		 * Set zoom of the map, or return zoom level
 		 * @since 0.0.1
 		 * @param {Number} zoom Zoom level of the map. *Optional*
-		 * @returns {Map} Returned map object, if the parameter not passed
-		 * @returns {Number} Returned number of zoom level, if the parameter passed
+		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Number} Returns number of zoom level, if the parameter passed
 		 */
 		zoom: function(zoom) {
 			// todo
@@ -65,7 +69,7 @@ swift.Map(document.body, {
 		/**
 		 * Increased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		zoomIn: function() {
 			// todo
@@ -73,7 +77,7 @@ swift.Map(document.body, {
 		/**
 		 * Decreased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		zoomOut: function() {
 			// todo
@@ -91,9 +95,16 @@ swift.Map(document.body, {
 		 * Update map options
 		 * @since 0.0.1
 		 * @param {Object} opts Map options. *Optional*
-		 * @returns {Map} Returned map object
+		 * @returns {Map} Returns map object
 		 */
 		update: function(opts) {
 			// todo
+		},
+		
+		// + + + + + Ignored methods + + + + +
+		
+		/** @ignore */
+		init: function() {
+			
 		}
-	};
+	});

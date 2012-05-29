@@ -4,6 +4,7 @@
 	 */
 	var swift = {
 		EventCover: EventCover,
+		Point: Point,
 		Map: Map,
 
 		/**
