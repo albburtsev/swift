@@ -3,6 +3,7 @@
 	 * @namespace
 	 */
 	var swift = {
+		EventCover: EventCover,
 		Map: Map,
 
 		/**
