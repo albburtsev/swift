@@ -10,15 +10,69 @@
 		<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
 		<script>
 		$(function() {
-			var	_mymap = $('#mymap').css({
-				width: 1,
-				height: 1,
-				visibility: 'hidden'
-			});
-
 			test('Namespace swift', function() {
 				ok( !!window.swift, 'Namespace swift exist' );
 				ok( swift.ns instanceof Function, 'Method swift.ns() exist' );
+			});
+
+			test('Namespace swift.utils', function() {
+				ok( swift.utils, 'Namespace swift.utils exist' );
+				ok( swift.utils.tmpl('a${b}c${d}e', {b: 'b', d: 'd'}) === 'abcde', 'Template rendered ok with simple object data' );
+				ok( swift.utils.tmpl('e${i}', [{i: 2}, {i: 4}]) === 'e2e4', 'Template rendered ok with array objects data' );
+			});
+
+			test('Class ProjectionDefault', function() {
+				ok( swift.ProjectionDefault instanceof Function, 'Class ProjectionDefault exist' );
+
+				var	prj = swift.ProjectionDefault(),
+					point = swift.Point(10, 10),
+					pixel = swift.Pixel(1000, 1000),
+					zoom = 10;
+
+				ok(
+					prj.geoToPixel instanceof Function &&
+					prj.pixelToGeo instanceof Function &&
+					prj.pixelToTile instanceof Function
+				, 'All necessary methods exist');
+
+				// Method geoToPixel()
+				raises(function() { prj.geoToPixel(); }, 'prj.geoToPixel() throw error, ok');
+				raises(function() { prj.geoToPixel(point); }, 'prj.geoToPixel(point) throw error, ok');
+				ok( prj.geoToPixel(point, zoom) instanceof swift.Pixel, 'Method geoToPixel() return Pixel instance' );
+				strictEqual( prj.geoToPixel(point, zoom).x(), 138353, 'Method geoToPixel() return correctly pixel.x()' );
+				strictEqual( prj.geoToPixel(point, zoom).y(), 138391, 'Method geoToPixel() return correctly pixel.y()' );
+
+				// Method pixelToGeo
+				raises(function() { prj.pixelToGeo(); }, 'prj.pixelToGeo() throw error, ok');
+				raises(function() { prj.pixelToGeo(pixel); }, 'prj.pixelToGeo(pixel) throw error, ok');
+				ok( prj.pixelToGeo(pixel, zoom) instanceof swift.Point, 'Method pixelToGeo() return Point instance' );
+			});
+
+			test('Class Size', function() {
+				ok( swift.Size instanceof Function, 'Class Size exist' );
+				ok( new swift.Size(0, 0) instanceof swift.Size, 'Constructor successful called with "new"' );
+				ok( swift.Size(0, 0) instanceof swift.Size, 'Constructor successful called without "new"' );
+
+				raises(function() { swift.Size(); }, 'Size() throw error, ok');
+				raises(function() { swift.Size('Ups', 0); }, 'Size("Ups", 0) throw error, ok');
+			});
+
+			test('Class Pixel', function() {
+				ok( swift.Pixel instanceof Function, 'Class Pixel exist' );
+				ok( new swift.Pixel(0, 0) instanceof swift.Pixel, 'Constructor successful called with "new"' );
+				ok( swift.Pixel(0, 0) instanceof swift.Pixel, 'Constructor successful called without "new"' );
+
+				raises(function() { swift.Pixel(); }, 'Pixel() throw error, ok');
+				raises(function() { swift.Pixel('Ups', 0); }, 'Pixel("Ups", 0) throw error, ok');
+
+				var	x = 1.1,
+					y = 2.2,
+					mustX = 1,
+					mustY = 2,
+					pixel = swift.Pixel(x, y);
+
+				strictEqual(swift.Pixel(x,y).x(), mustX, 'Method x() worked correctly');
+				strictEqual(swift.Pixel(x,y).y(), mustY, 'Method y() worked correctly');
 			});
 
 			test('Class Point', function() {
@@ -26,25 +80,51 @@
 				ok( new swift.Point(0, 0) instanceof swift.Point, 'Constructor successful called with "new"' );
 				ok( swift.Point(0, 0) instanceof swift.Point, 'Constructor successful called without "new"' );
 
+				raises(function() { swift.Point('a', 0); }, 'Point("a", 0) throw error, ok');
+				raises(function() { swift.Point(); }, 'Point() throw error, ok');
+
 				var	point = swift.Point(0, 0);
 				ok( point.lon instanceof Function, 'Method lon() exist' );
 				ok( point.lat instanceof Function, 'Method lat() exist' );
 				ok( point.distance instanceof Function, 'Method distance() exist' );
-				/*
+
 				var	lon = 1.11,
 					lat = 2.22,
 					point = swift.Point(lon, lat);
 
 				strictEqual(point.lon(), lon, 'Method lon() worked correctly');
 				strictEqual(point.lat(), lat, 'Method lat() worked correctly');
-				*/
+				strictEqual( swift.Point(37.617633, 55.755786).toString(), '37.617633°, 55.755786°', 'Method toString() worked correctly');
+
+				var	lon = 1.11111111111111,
+					lat = 2.22222222222222,
+					mustLon = 1.111111,
+					mustLat = 2.222222,
+					point = swift.Point(lon, lat);
+
+				strictEqual(point.lon(), mustLon, 'Latitude rounding correctly');
+				strictEqual(point.lat(), mustLat, 'Longitude rounding correctly');
+
+				strictEqual(swift.Point(0, 99).lat(), 90, 'Latitude max extent correctly');
+				strictEqual(swift.Point(0, -99).lat(), -90, 'Latitude min extent correctly');
+
+				strictEqual(swift.Point(190, 0).lon(), -170, 'Longitude max extent correctly');
+				strictEqual(swift.Point(-190, 0).lon(), 170, 'Longitude min extent correctly');
 			});
 
 			test('Class Map', function() {
+				var	mapNode = $('#mymap').css({
+					width: 1,
+					height: 1,
+					visibility: 'hidden'
+				}).get(0);
+
 				ok( swift.Map instanceof Function, 'Class Map exist' );
-				ok( new swift.Map(_mymap.get(0)) instanceof swift.Map, 'Constructor successful called with "new"' );
-				ok( swift.Map(_mymap.get(0)) instanceof swift.Map, 'Constructor successful called without "new"' );
-				ok( swift.Map(_mymap.get(0)) instanceof swift.EventCover, 'Successful class EventCover inherits' );
+				ok( new swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called with "new"' );
+				ok( swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called without "new"' );
+				ok( swift.Map(mapNode) instanceof swift.EventCover, 'Successful class EventCover inherits' );
+
+				
 
 				/*
 				var	mymap = new swift.Map( _mymap.get(0) );

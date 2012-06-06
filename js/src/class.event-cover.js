@@ -12,7 +12,7 @@ map.on('click', function(e) {
 });
 	 */
 	function EventCover() {
-		
+		// Do nothing, abstract class
 	};
 
 	EventCover.prototype = {
@@ -21,8 +21,8 @@ map.on('click', function(e) {
 		 * @since 0.0.1
 		 * @param {String} evetns Event string or some space-separated evets. **Required**
 		 * @param {Function} handler Callback. **Required**
-		 * @param {Object} opts Handling options. *Optional*
-		 * @param {Boolean} opts.one The handler executed one time and removed, default - false. *Optional*
+		 * @param {Object} [opts] Handling options.
+		 * @param {Boolean} [opts.one] The handler executed one time and removed, default - false.
 		 * @returns {Context object} Returns object
 		 */
 		on: function(evetns, handler, opts) {
@@ -31,8 +31,8 @@ map.on('click', function(e) {
 		/**
 		 * Remove event handler
 		 * @since 0.0.1
-		 * @param {String} evetns Event string or some space-separated evets. If parameter passed, it removed all handlers of all events. *Optional*
-		 * @param {Function} handler Callback, which will be removed. *Optional*
+		 * @param {String} [evetns] Event string or some space-separated evets. If parameter passed, it removed all handlers of all events.
+		 * @param {Function} [handler] Callback, which will be removed.
 		 * @returns {Context object} Returns object
 		 */
 		off: function(evetns, handler) {
@@ -44,7 +44,7 @@ map.on('click', function(e) {
 		 * @param {String} e Event object. **Required**
 		 * @returns {Point} Point with geographic coordinates
 		 */
-		wgs: function() {
+		geo: function() {
 			// todo
 		}
 	};

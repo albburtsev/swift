@@ -3,9 +3,16 @@
 	 * @namespace
 	 */
 	var swift = {
+		// Classes
+		ProjectionDefault: ProjectionDefault,
 		EventCover: EventCover,
+		Size: Size,
 		Point: Point,
+		Pixel: Pixel,
 		Map: Map,
+
+		// Namespaces
+		utils: utils,
 
 		/**
 		 * Adds new namespace
