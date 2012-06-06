@@ -118,18 +118,23 @@
 					height: 1,
 					visibility: 'hidden'
 				}).get(0);
+				
+				var	mymap = new swift.Map( mapNode );
 
+				// Class Map checker
 				ok( swift.Map instanceof Function, 'Class Map exist' );
 				ok( new swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called with "new"' );
 				ok( swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called without "new"' );
-				ok( swift.Map(mapNode) instanceof swift.EventCover, 'Successful class EventCover inherits' );
+				ok( mymap instanceof swift.EventCover, 'Successful class EventCover inherits' );
 
+				// Instance Map checker
+				raises(function() { swift.Map(); }, 'Map call without parameter node throw error, ok');
+				raises(function() { swift.Map( mapNode, { center: 1 } ); }, 'Map option center = 1 throw error, ok');
+				raises(function() { swift.Map( mapNode, { zoom: 'b' } ); }, 'Map option zoom = "a" throw error, ok');
 				
-
-				/*
-				var	mymap = new swift.Map( _mymap.get(0) );
-				ok( mymap.center() instanceof swift.Point, 'mymap.center()' );
-				*/
+				strictEqual( swift.Map(mapNode, { zoom: 100 }).zoom(), 17, 'Zoom can not be more than maxZoom' );
+				strictEqual( swift.Map(mapNode, { zoom: -10 }).zoom(), 1, 'Zoom can not be less than minZoom' );
+				//ok( mymap.center() instanceof swift.Point, 'mymap.center() instance of Point' );
 			});
 		});
 		</script>

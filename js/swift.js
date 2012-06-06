@@ -3,32 +3,88 @@
 (function(window, document, undefined) {
 	'use strict';
 
+	function empty() {
+		// Do nothing
+	};
 	/**
+	 * Namespace with useful utilites
 	 * @namespace
 	 * @name utils
 	 * @since 0.0.1
-	 * @ignore
 	 */
-	var	utils = {
+	var	utils =
+	/** @lends utils */ 
+	{
+		/**
+		 * Get value of computed style for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {String} prop Style property. **Required**
+		 * @returns {String} Value of computed style
+		 */
+		computed: function(node, prop) {
+			if ( !window.getComputedStyle )
+				window.getComputedStyle = function(el) {
+					var	re = /(\-([a-z]){1})/g;
+					this.el = el;
+					this.getPropertyValue = function(prop) {
+						if ( prop == 'float' )
+							prop = 'styleFloat';
+						if ( re.test(prop) )
+							prop = prop.replace(re, function($0, $1, $2) {
+								return $2.toUpperCase();
+							});
+						return el.currentStyle[prop] ? el.currentStyle[prop] : null;
+					};
+					return this;
+				};
+			return getComputedStyle(node).getPropertyValue(prop);
+		},
+		/**
+		 * Add styles for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [styles] Object with styles
+		 * @returns {Object} Returns namespace utils
+		 */
+		css: function(node, styles) {
+			this.each(styles || {}, function(prop, value) {
+				node.style[prop] = value;
+			});
+		},
+		/**
+		 * Objects iterator
+		 * @since 0.0.1
+		 * @param {Object} [obj]
+		 * @param {Function} [callback]
+		 * @returns {Object} Returns namespace utils
+		 */
+		each: function(obj, callback) {
+			obj = obj || {};
+			callback = callback || empty;
+			for (var i in obj)
+				if ( obj.hasOwnProperty(i) )
+					callback.call(this, i, obj[i]);
+		},
 		/**
 		 * Simple inheritance
 		 * @since 0.0.1
-		 * @param {Function} parent Parent class
-		 * @param {Function} child Class that inherits from parent
-		 * @param {Object} proto Prototype object
-		 * @ignore
+		 * @param {Function} parent Parent class. **Required**
+		 * @param {Function} child Class that inherits from parent. **Required**
+		 * @param {Object} [proto] Prototype object
+		 * @returns {Object} Returns namespace utils
 		 */
 		extend: function(parent, child, proto) {
 			function F() {};
 			F.prototype = parent.prototype;
 			child.prototype = new F();
 			child.prototype.constructor = child;
-			utils.mixin(child.prototype, proto);
+			this.mixin(child.prototype, proto);
+			return this;
 		},
 		/**
 		 * Objects merger
 		 * @since 0.0.1
-		 * @ignore
 		 */
 		mixin: function() {
 			var	target = arguments[0],
@@ -44,20 +100,42 @@
 			return target;
 		},
 		/**
+		 * Create HTML-elements
+		 * @since 0.0.1
+		 * @param {String} [name] Element name, default - 'div'
+		 * @param {String} [html] Element html content.
+		 * @param {Object} [attr] Object with attribites.
+		 * @param {Object} [styles] Object with styles.
+		 * @returns {HTMLElement} Element
+		 */
+		node: function(name, html, attr, styles) {
+			var	node = document.createElement(name || 'div');
+			node.innerHTML = html || '';
+			this
+				//.attr(node, attr)
+				.css(node, styles);
+			return node;
+		},
+		/**
 		 * Rewrite object property to technical name: __name
+		 * @since 0.0.1
+		 * @param {Object} obj **Required**
+		 * @param {String} prop Property name. **Required**
+		 * @returns {Object} Returns namespace utils
 		 */
 		reprop: function(obj, prop) {
 			if ( obj[prop] ) {
 				obj['__' + prop] = obj[prop];
 				delete obj[prop];
 			}
+			return this;
 		},
 		/**
 		 * Render string content from simple templates with only variables
 		 * @since 0.0.1
-		 * @param {String} template Template
-		 * @param {Object|Array} data Object with data
-		 * @ignore
+		 * @param {String} template Template. **Required**
+		 * @param {Object|Array} data Object with data. **Required**
+		 * @returns {String} Rendered string
 		 */
 		tmpl: function(template, data) {
 			var	out = '', i;
@@ -491,6 +569,9 @@ Point(37.6, 55.8);
 	 * @param {Object} [opts] Map options
 	 * @param {Number} [opts.zoom] Map zoom [1..17], default - 10.
 	 * @param {Point} [opts.center] Center of the map, default - swift.Point(37.617633, 55.755786).
+	 * @param {Number} [opts.minZoom] The minimum possible zoom, default - 1.
+	 * @param {Number} [opts.maxZoom] The maximum possible zoom, default - 17.
+	 * @param {String} [opts.background] Background color for map node, default -  '#eee'.
 	 * @example
 new swift.Map(document.body, {
 	zoom: 11,
@@ -506,29 +587,54 @@ swift.Map(document.body, {
 		if ( !(this instanceof Map) )
 			return new Map(node, opts);
 
+		// Check the arguments
 		opts = opts || {};
-		
-		/*
+		node = node || {};
+
 		utils
 			.reprop(opts, 'center')
 			.reprop(opts, 'zoom')
-		;
+			.mixin(this, {
+				layers: [],
+				constrols: []
+			}, opts);
 
-		utils.mixin(this, {
-			
-		}, opts);
+		this.zoom(opts.__zoom || this.defaultZoom);
+		this.center(opts.__center || this.defaultCenter);
 
-		if (
-			node.nodeType !== 1 ||
-			isNaN( this.__zoom ) ||
-			!( this.__center instanceof Point )
-		) throw ErrorInvalidArguments();
-		*/
+		if ( node.nodeType !== 1 )
+			throw ErrorInvalidArguments();
+
+		// Prepare node
+		var	nodeStylePosition = utils.computed(node, 'position');
+		utils.css(node, {
+			background: this.background,
+			position: nodeStylePosition === 'static' ? 'relative' : nodeStylePosition
+		});
+		this._node = node;
+
+		// Init layers
+		this._layers = utils.node('div', '', '', {
+			position: 'absolute',
+			left: 0,
+			top: 0
+		});
+		node.appendChild(this._layers);
+
+		// Init events handling
+
+		// Init controls
+		// this._controls; // node
 	};
 
 	utils.extend(EventCover, Map,
 	/** @lends Map.prototype */
 	{
+		background: '#eee',
+		defaultZoom: 10,
+		defaultCenter: Point(37.617633, 55.755786),
+		minZoom: 1,
+		maxZoom: 17,
 		/**
 		 * Set center of the map, or return center
 		 * @since 0.0.1
@@ -537,7 +643,14 @@ swift.Map(document.body, {
 		 * @returns {Point} Returns center of the map, if the parameter passed
 		 */
 		center: function(center) {
-			// todo
+			if ( center === undefined )
+				return this.__center;
+
+			if ( !(center instanceof Point) )
+				throw ErrorInvalidArguments();
+
+			this.__center = center;
+			return this;
 		},
 		/**
 		 * Set bounds of the map, or return bounds
@@ -565,7 +678,17 @@ swift.Map(document.body, {
 		 * @returns {Number} Returns number of zoom level, if the parameter passed
 		 */
 		zoom: function(zoom) {
-			// todo
+			if ( zoom === undefined )
+				return this.__zoom;
+
+			zoom = parseInt(zoom);
+			if ( isNaN(zoom) )
+				throw ErrorInvalidArguments();
+
+			zoom = Math.min(zoom, this.maxZoom);
+			zoom = Math.max(zoom, this.minZoom);
+			this.__zoom = zoom;
+			return this;
 		},
 		/**
 		 * Increased zoom level
@@ -600,13 +723,6 @@ swift.Map(document.body, {
 		 */
 		update: function(opts) {
 			// todo
-		},
-		
-		// + + + + + Ignored methods + + + + +
-		
-		/** @ignore */
-		init: function() {
-			
 		}
 	});
 

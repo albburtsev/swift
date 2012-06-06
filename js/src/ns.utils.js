@@ -1,29 +1,82 @@
 	/**
+	 * Namespace with useful utilites
 	 * @namespace
 	 * @name utils
 	 * @since 0.0.1
-	 * @ignore
 	 */
-	var	utils = {
+	var	utils =
+	/** @lends utils */ 
+	{
+		/**
+		 * Get value of computed style for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {String} prop Style property. **Required**
+		 * @returns {String} Value of computed style
+		 */
+		computed: function(node, prop) {
+			if ( !window.getComputedStyle )
+				window.getComputedStyle = function(el) {
+					var	re = /(\-([a-z]){1})/g;
+					this.el = el;
+					this.getPropertyValue = function(prop) {
+						if ( prop == 'float' )
+							prop = 'styleFloat';
+						if ( re.test(prop) )
+							prop = prop.replace(re, function($0, $1, $2) {
+								return $2.toUpperCase();
+							});
+						return el.currentStyle[prop] ? el.currentStyle[prop] : null;
+					};
+					return this;
+				};
+			return getComputedStyle(node).getPropertyValue(prop);
+		},
+		/**
+		 * Add styles for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [styles] Object with styles
+		 * @returns {Object} Returns namespace utils
+		 */
+		css: function(node, styles) {
+			this.each(styles || {}, function(prop, value) {
+				node.style[prop] = value;
+			});
+		},
+		/**
+		 * Objects iterator
+		 * @since 0.0.1
+		 * @param {Object} [obj]
+		 * @param {Function} [callback]
+		 * @returns {Object} Returns namespace utils
+		 */
+		each: function(obj, callback) {
+			obj = obj || {};
+			callback = callback || empty;
+			for (var i in obj)
+				if ( obj.hasOwnProperty(i) )
+					callback.call(this, i, obj[i]);
+		},
 		/**
 		 * Simple inheritance
 		 * @since 0.0.1
-		 * @param {Function} parent Parent class
-		 * @param {Function} child Class that inherits from parent
-		 * @param {Object} proto Prototype object
-		 * @ignore
+		 * @param {Function} parent Parent class. **Required**
+		 * @param {Function} child Class that inherits from parent. **Required**
+		 * @param {Object} [proto] Prototype object
+		 * @returns {Object} Returns namespace utils
 		 */
 		extend: function(parent, child, proto) {
 			function F() {};
 			F.prototype = parent.prototype;
 			child.prototype = new F();
 			child.prototype.constructor = child;
-			utils.mixin(child.prototype, proto);
+			this.mixin(child.prototype, proto);
+			return this;
 		},
 		/**
 		 * Objects merger
 		 * @since 0.0.1
-		 * @ignore
 		 */
 		mixin: function() {
 			var	target = arguments[0],
@@ -39,20 +92,42 @@
 			return target;
 		},
 		/**
+		 * Create HTML-elements
+		 * @since 0.0.1
+		 * @param {String} [name] Element name, default - 'div'
+		 * @param {String} [html] Element html content.
+		 * @param {Object} [attr] Object with attribites.
+		 * @param {Object} [styles] Object with styles.
+		 * @returns {HTMLElement} Element
+		 */
+		node: function(name, html, attr, styles) {
+			var	node = document.createElement(name || 'div');
+			node.innerHTML = html || '';
+			this
+				//.attr(node, attr)
+				.css(node, styles);
+			return node;
+		},
+		/**
 		 * Rewrite object property to technical name: __name
+		 * @since 0.0.1
+		 * @param {Object} obj **Required**
+		 * @param {String} prop Property name. **Required**
+		 * @returns {Object} Returns namespace utils
 		 */
 		reprop: function(obj, prop) {
 			if ( obj[prop] ) {
 				obj['__' + prop] = obj[prop];
 				delete obj[prop];
 			}
+			return this;
 		},
 		/**
 		 * Render string content from simple templates with only variables
 		 * @since 0.0.1
-		 * @param {String} template Template
-		 * @param {Object|Array} data Object with data
-		 * @ignore
+		 * @param {String} template Template. **Required**
+		 * @param {Object|Array} data Object with data. **Required**
+		 * @returns {String} Rendered string
 		 */
 		tmpl: function(template, data) {
 			var	out = '', i;
