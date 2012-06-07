@@ -8,8 +8,8 @@
 	 * @param {Object} [opts] Map options
 	 * @param {Number} [opts.zoom] Map zoom [1..17], default - 10.
 	 * @param {Point} [opts.center] Center of the map, default - swift.Point(37.617633, 55.755786).
-	 * @param {Number} [opts.minZoom] The minimum possible zoom, default - 1.
-	 * @param {Number} [opts.maxZoom] The maximum possible zoom, default - 17.
+	 * @param {Number} [opts.minZoom] The minimum possible zoom, default - 0.
+	 * @param {Number} [opts.maxZoom] The maximum possible zoom, default - 18.
 	 * @param {String} [opts.background] Background color for map node, default -  '#eee'.
 	 * @example
 new swift.Map(document.body, {
@@ -66,7 +66,7 @@ swift.Map(document.body, {
 		this.rp(true);
 
 		// Init layers
-		this._layers = utils.node('div', '', '', {
+		this._layers = utils.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0
@@ -91,7 +91,7 @@ swift.Map(document.body, {
 		defaultZoom: 10,
 		defaultCenter: Point(37.617633, 55.755786),
 		minZoom: 0,
-		maxZoom: 17,
+		maxZoom: 18,
 
 		/**
 		 * Add various objects on map

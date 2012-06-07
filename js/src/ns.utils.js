@@ -119,14 +119,12 @@
 		 * Create HTML-elements
 		 * @since 0.0.1
 		 * @param {String} [name] Element name, default - 'div'
-		 * @param {String} [html] Element html content.
 		 * @param {Object} [attr] Object with attribites.
 		 * @param {Object} [styles] Object with styles.
 		 * @returns {HTMLElement} Element
 		 */
-		node: function(name, html, attr, styles) {
+		node: function(name, attr, styles) {
 			var	node = document.createElement(name || 'div');
-			node.innerHTML = html || '';
 			this
 				.attr(node, attr)
 				.css(node, styles);

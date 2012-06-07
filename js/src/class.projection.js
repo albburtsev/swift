@@ -70,6 +70,37 @@
 			);
 		},
 		/**
+		 * Normalize tile indexes
+		 * @since 0.0.1
+		 * @param {Number} ti Tile index. **Required**
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Normalize tile index
+		 */
+		normalize: function(ti, zoom) {
+			var	tiles = Math.pow(2, zoom);
+			ti = ti % tiles;
+			ti = ti < 0 ? tiles + ti : ti;
+			return ti;
+		},
+		/**
+		 * Return maximum tile index for given zoom
+		 * @since 0.0.1
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Maximum tile index
+		 */
+		max: function(zoom) {
+			return Math.pow(2, zoom) - 1;
+		},
+		/**
+		 * Return maximum tile index for given zoom
+		 * @since 0.0.1
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Maximum tile index
+		 */
+		min: function(zoom) {
+			return 0;
+		},
+		/**
 		 * Convert pixel coordinates to geographic coordinates
 		 * @since 0.0.1
 		 * @param {Pixel} pixel Pixel coordinates. **Required**

@@ -53,7 +53,7 @@ map.add(
 		}, opts);
 
 		// Create layer node
-		this._node = utils.node('div', '', '', {
+		this._node = utils.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0
@@ -78,6 +78,7 @@ map.add(
 				return;
 
 			var	rpt = this.rp(), // Tile for reference point of layer
+				prj = this.prj(), // Projection of layer
 				vp = this.map.vp(), // Map viewport
 				vpc = vp.center(), // Center of map viewport
 				tileWidth = this.tileSize.width(),
@@ -90,32 +91,38 @@ map.add(
 				txMax = rpt.tx + reserveX, // Maximum tile x-index
 				tyMin = rpt.ty - reserveY, // Minimal tile y-index
 				tyMax = rpt.ty + reserveY, // Maximum tile y-index
-				tx, ty;
+				tx, ty, tz = rpt.tz,
+				tile;
 
-			/*
-			console.log(
+			// Do not repeat for Y-direction
+			tyMin = Math.max(prj.min(tz), tyMin);
+			tyMax = Math.min(prj.max(tz), tyMax);
+
+			/*console.log(
 				'reserveX', reserveX,
 				'reserveY', reserveY,
 				'txMin', txMin,
 				'txMax', txMax,
 				'tyMin', tyMin,
 				'tyMax', tyMax
-			);
-			*/
+			);*/
 
 			for (tx = txMin; tx <= txMax; tx++) {
 				for (ty = tyMin; ty <= tyMax; ty++) {
-					this._node.appendChild( this.tileNode(
-						Tile(tx, ty, rpt.tz, {
-							
-						}), {
-							position: 'absolute',
-							top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
-							left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
-						}
-					) );
+					tile = Tile(tx, ty, tz, {
+						tnx: prj.normalize(tx, tz),
+						tny: prj.normalize(ty, tz)
+					});
+					this._node.appendChild( this.tileNode(tile, {
+						position: 'absolute',
+						top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
+						left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
+					}) );
 				}
 			}
+
+			// Memory leak fix
+			rpt = prj = vp = vpc = tile = null;
 		},
 		/**
 		 * Return tile node
@@ -126,7 +133,7 @@ map.add(
 		 * @ignore
 		 */
 		tileNode: function(tile, styles) {
-			return utils.node('img', '', {
+			return utils.node('img', {
 				src: this.url(tile.tnx, tile.tny, tile.tz),
 				width: this.tileSize.width(),
 				height: this.tileSize.height()

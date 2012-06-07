@@ -127,14 +127,12 @@
 		 * Create HTML-elements
 		 * @since 0.0.1
 		 * @param {String} [name] Element name, default - 'div'
-		 * @param {String} [html] Element html content.
 		 * @param {Object} [attr] Object with attribites.
 		 * @param {Object} [styles] Object with styles.
 		 * @returns {HTMLElement} Element
 		 */
-		node: function(name, html, attr, styles) {
+		node: function(name, attr, styles) {
 			var	node = document.createElement(name || 'div');
-			node.innerHTML = html || '';
 			this
 				.attr(node, attr)
 				.css(node, styles);
@@ -495,7 +493,7 @@ Point(37.6, 55.8);
 	 * @param {Number} tx Horizontal tile index. **Required**
 	 * @param {Number} ty Vertical tile index. **Required**
 	 * @param {Number} tz Zoom level. **Required**
-	 * @param {Number} [opts] Advanced options for tile.
+	 * @param {Object} [opts] Advanced options for tile.
 	 * @param {Number} [opts.tnx] Normalize horizontal tile index.
 	 * @param {Number} [opts.tny] Normalize vertical tile index.
 	 * @param {Number} [opts.tpx] Horizontal pixel offset from the reference point.
@@ -589,6 +587,37 @@ Point(37.6, 55.8);
 				zoom,
 				tileSize
 			);
+		},
+		/**
+		 * Normalize tile indexes
+		 * @since 0.0.1
+		 * @param {Number} ti Tile index. **Required**
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Normalize tile index
+		 */
+		normalize: function(ti, zoom) {
+			var	tiles = Math.pow(2, zoom);
+			ti = ti % tiles;
+			ti = ti < 0 ? tiles + ti : ti;
+			return ti;
+		},
+		/**
+		 * Return maximum tile index for given zoom
+		 * @since 0.0.1
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Maximum tile index
+		 */
+		max: function(zoom) {
+			return Math.pow(2, zoom) - 1;
+		},
+		/**
+		 * Return maximum tile index for given zoom
+		 * @since 0.0.1
+		 * @param {Number} zoom Zoom level. **Required**
+		 * @returns {Number} Maximum tile index
+		 */
+		min: function(zoom) {
+			return 0;
 		},
 		/**
 		 * Convert pixel coordinates to geographic coordinates
@@ -751,7 +780,7 @@ map.add(
 		}, opts);
 
 		// Create layer node
-		this._node = utils.node('div', '', '', {
+		this._node = utils.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0
@@ -776,6 +805,7 @@ map.add(
 				return;
 
 			var	rpt = this.rp(), // Tile for reference point of layer
+				prj = this.prj(), // Projection of layer
 				vp = this.map.vp(), // Map viewport
 				vpc = vp.center(), // Center of map viewport
 				tileWidth = this.tileSize.width(),
@@ -788,32 +818,38 @@ map.add(
 				txMax = rpt.tx + reserveX, // Maximum tile x-index
 				tyMin = rpt.ty - reserveY, // Minimal tile y-index
 				tyMax = rpt.ty + reserveY, // Maximum tile y-index
-				tx, ty;
+				tx, ty, tz = rpt.tz,
+				tile;
 
-			/*
-			console.log(
+			// Do not repeat for Y-direction
+			tyMin = Math.max(prj.min(tz), tyMin);
+			tyMax = Math.min(prj.max(tz), tyMax);
+
+			/*console.log(
 				'reserveX', reserveX,
 				'reserveY', reserveY,
 				'txMin', txMin,
 				'txMax', txMax,
 				'tyMin', tyMin,
 				'tyMax', tyMax
-			);
-			*/
+			);*/
 
 			for (tx = txMin; tx <= txMax; tx++) {
 				for (ty = tyMin; ty <= tyMax; ty++) {
-					this._node.appendChild( this.tileNode(
-						Tile(tx, ty, rpt.tz, {
-							
-						}), {
-							position: 'absolute',
-							top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
-							left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
-						}
-					) );
+					tile = Tile(tx, ty, tz, {
+						tnx: prj.normalize(tx, tz),
+						tny: prj.normalize(ty, tz)
+					});
+					this._node.appendChild( this.tileNode(tile, {
+						position: 'absolute',
+						top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
+						left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
+					}) );
 				}
 			}
+
+			// Memory leak fix
+			rpt = prj = vp = vpc = tile = null;
 		},
 		/**
 		 * Return tile node
@@ -824,7 +860,7 @@ map.add(
 		 * @ignore
 		 */
 		tileNode: function(tile, styles) {
-			return utils.node('img', '', {
+			return utils.node('img', {
 				src: this.url(tile.tnx, tile.tny, tile.tz),
 				width: this.tileSize.width(),
 				height: this.tileSize.height()
@@ -870,8 +906,8 @@ map.add(
 	 * @param {Object} [opts] Map options
 	 * @param {Number} [opts.zoom] Map zoom [1..17], default - 10.
 	 * @param {Point} [opts.center] Center of the map, default - swift.Point(37.617633, 55.755786).
-	 * @param {Number} [opts.minZoom] The minimum possible zoom, default - 1.
-	 * @param {Number} [opts.maxZoom] The maximum possible zoom, default - 17.
+	 * @param {Number} [opts.minZoom] The minimum possible zoom, default - 0.
+	 * @param {Number} [opts.maxZoom] The maximum possible zoom, default - 18.
 	 * @param {String} [opts.background] Background color for map node, default -  '#eee'.
 	 * @example
 new swift.Map(document.body, {
@@ -928,7 +964,7 @@ swift.Map(document.body, {
 		this.rp(true);
 
 		// Init layers
-		this._layers = utils.node('div', '', '', {
+		this._layers = utils.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0
@@ -953,7 +989,7 @@ swift.Map(document.body, {
 		defaultZoom: 10,
 		defaultCenter: Point(37.617633, 55.755786),
 		minZoom: 0,
-		maxZoom: 17,
+		maxZoom: 18,
 
 		/**
 		 * Add various objects on map

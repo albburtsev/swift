@@ -6,7 +6,7 @@
 	 * @param {Number} tx Horizontal tile index. **Required**
 	 * @param {Number} ty Vertical tile index. **Required**
 	 * @param {Number} tz Zoom level. **Required**
-	 * @param {Number} [opts] Advanced options for tile.
+	 * @param {Object} [opts] Advanced options for tile.
 	 * @param {Number} [opts.tnx] Normalize horizontal tile index.
 	 * @param {Number} [opts.tny] Normalize vertical tile index.
 	 * @param {Number} [opts.tpx] Horizontal pixel offset from the reference point.
