@@ -4,12 +4,15 @@
 	 */
 	var swift = {
 		// Classes
-		ProjectionDefault: ProjectionDefault,
 		EventCover: EventCover,
-		Size: Size,
-		Point: Point,
-		Pixel: Pixel,
+		Layer: Layer,
 		Map: Map,
+		Pixel: Pixel,
+		Point: Point,
+		ProjectionDefault: ProjectionDefault,
+		Size: Size,
+		Tile: Tile,
+		TileLayer: TileLayer,
 
 		// Namespaces
 		utils: utils,

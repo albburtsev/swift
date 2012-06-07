@@ -16,6 +16,25 @@
 	/** @lends utils */ 
 	{
 		/**
+		 * Add attributes for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [attr] Object with attributes
+		 * @returns {Object} Returns namespace utils
+		 */
+		attr: function(node, attr) {
+			this.each(attr || {}, function(name, value) {
+				if ( name.match(/^on/) ) {
+					node[name] = value;
+				} else {
+					var	dattr = document.createAttribute(name);
+					dattr.value = value;
+					node.setAttributeNode(dattr);
+				}
+			});
+			return this;
+		},
+		/**
 		 * Get value of computed style for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -23,10 +42,12 @@
 		 * @returns {String} Value of computed style
 		 */
 		computed: function(node, prop) {
-			if ( !window.getComputedStyle )
-				window.getComputedStyle = function(el) {
+			if ( !window.getComputedStyle ) {
+				/** @ignore */
+				var gcs = function(el) {
 					var	re = /(\-([a-z]){1})/g;
 					this.el = el;
+					/** @ignore */
 					this.getPropertyValue = function(prop) {
 						if ( prop == 'float' )
 							prop = 'styleFloat';
@@ -38,6 +59,8 @@
 					};
 					return this;
 				};
+				window.getComputedStyle = gcs;
+			}
 			return getComputedStyle(node).getPropertyValue(prop);
 		},
 		/**
@@ -51,6 +74,7 @@
 			this.each(styles || {}, function(prop, value) {
 				node.style[prop] = value;
 			});
+			return this;
 		},
 		/**
 		 * Objects iterator
@@ -112,9 +136,18 @@
 			var	node = document.createElement(name || 'div');
 			node.innerHTML = html || '';
 			this
-				//.attr(node, attr)
+				.attr(node, attr)
 				.css(node, styles);
 			return node;
+		},
+		/**
+		 * Find and return first not undefined argument
+		 * @since 0.0.1
+		 */
+		or: function() {
+			for (var i = 0; i < arguments.length; i++)
+				if ( arguments[i] !== undefined )
+					return arguments[i];
 		},
 		/**
 		 * Rewrite object property to technical name: __name
@@ -235,18 +268,15 @@ map.on('click', function(e) {
 
 	Size.prototype = {
 		/**
-		 * Set a new width, or return current
+		 * Returns center of area
 		 * @since 0.0.1
-		 * @param {Number} [width] New width.
-		 * @returns {Size} Returns size object, if the parameter not passed.
-		 * @returns {Number} Returns width, if the parameter passed.
+		 * @returns {Pixel} Pixel instance for center
 		 */
-		width: function(width) {
-			if ( width === undefined )
-				return this.__w;
-
-			this.__w = this.valid(width);
-			return this;
+		center: function() {
+			return Pixel(
+				this.width() / 2,
+				this.height() / 2
+			);
 		},
 		/**
 		 * Set a new height, or return current
@@ -274,6 +304,20 @@ map.on('click', function(e) {
 			if ( isNaN(val) )
 				throw ErrorInvalidArguments();
 			return val;
+		},
+		/**
+		 * Set a new width, or return current
+		 * @since 0.0.1
+		 * @param {Number} [width] New width.
+		 * @returns {Size} Returns size object, if the parameter not passed.
+		 * @returns {Number} Returns width, if the parameter passed.
+		 */
+		width: function(width) {
+			if ( width === undefined )
+				return this.__w;
+
+			this.__w = this.valid(width);
+			return this;
 		}
 	};
 	/**
@@ -444,6 +488,38 @@ Point(37.6, 55.8);
 		}
 	};
 	/**
+	 * Create tile instance
+	 * @class
+	 * @name Tile
+	 * @since 0.0.1
+	 * @param {Number} tx Horizontal tile index. **Required**
+	 * @param {Number} ty Vertical tile index. **Required**
+	 * @param {Number} tz Zoom level. **Required**
+	 * @param {Number} [opts] Advanced options for tile.
+	 * @param {Number} [opts.tnx] Normalize horizontal tile index.
+	 * @param {Number} [opts.tny] Normalize vertical tile index.
+	 * @param {Number} [opts.tpx] Horizontal pixel offset from the reference point.
+	 * @param {Number} [opts.tpy] Vertical pixel offset from the reference point.
+	 * @param {Pixel} [opts.pixel] Reference point.
+	 */
+	function Tile(tx, ty, tz, opts) {
+		if ( !(this instanceof Tile) )
+			return new Tile(tx, ty, tz, opts);
+
+		utils.mixin(this, {
+			tx: tx,
+			ty: ty,
+			tz: tz
+		}, opts);
+
+		this.tnx = utils.or(this.tnx, this.tx);
+		this.tny = utils.or(this.tny, this.ty);
+	};
+
+	Tile.prototype = {
+		// todo
+	};
+	/**
 	 * Create instance for calculation coordinates in WGS84 system for spherical mercator projection
 	 * @class
 	 * @name ProjectionDefault
@@ -468,6 +544,16 @@ Point(37.6, 55.8);
 
 	ProjectionDefault.prototype = {
 		/**
+		 * Converts the number in degrees to the radian equivalent
+		 * @since 0.0.1
+		 * @param {Number} ang Degrees value
+		 * @returns {Number} Radian value
+		 * @ignore
+		 */
+		degToRad: function(deg) {
+			return deg * Math.PI / 180;
+		},
+		/**
 		 * Convert geographic coordinates to pixel coordinates
 		 * @since 0.0.1
 		 * @param {Point} point Geographic coordinates. **Required**
@@ -482,7 +568,7 @@ Point(37.6, 55.8);
 
 			var	mercX = this.degToRad( point.lon() ) * this.radius,
 				mercY = Math.log(Math.tan(Math.PI / 4 + this.degToRad(point.lat()) / 2.0)) * this.radius,
-				resolution = this.resolution(zoom);
+				resolution = this.resolution(zoom, tileSize);
 
 			return Pixel(
 				(mercX + this.halfEquator) / resolution.width(),
@@ -490,38 +576,34 @@ Point(37.6, 55.8);
 			);
 		},
 		/**
-		 * Converts the number in degrees to the radian equivalent
+		 * Convert geographic coordinates to tile coordinates
 		 * @since 0.0.1
-		 * @param {Number} ang Degrees value
-		 * @returns {Number} Radian value
-		 * @ignore
+		 * @param {Point} point Geographic coordinates. **Required**
+		 * @param {Number} zoom Zoom level for convertation. **Required**
+		 * @param {Size} [tileSize] Size of tile.
+		 * @returns {Tile} Tile instance.
 		 */
-		degToRad: function(deg) {
-			return deg * Math.PI / 180;
-		},
-		/**
-		 * Converts the radian number to the equivalent number in degrees
-		 * @since 0.0.1
-		 * @param {Number} ang Radian value
-		 * @returns {Number} Degrees value
-		 * @ignore
-		 */
-		radToDeg: function(rad) {
-			return rad * 180 / Math.PI;
+		geoToTile: function(point, zoom, tileSize) {
+			return this.pixelToTile(
+				this.geoToPixel(point, zoom, tileSize),
+				zoom,
+				tileSize
+			);
 		},
 		/**
 		 * Convert pixel coordinates to geographic coordinates
 		 * @since 0.0.1
 		 * @param {Pixel} pixel Pixel coordinates. **Required**
 		 * @param {Number} zoom Zoom level for convertation. **Required**
+		 * @param {Size} [tileSize] Size of tile.
 		 * @returns {Point} Geographic coordinates.
 		 */
-		pixelToGeo: function(pixel, zoom) {
+		pixelToGeo: function(pixel, zoom, tileSize) {
 			zoom = parseInt(zoom);
 			if ( !(pixel instanceof Pixel) || isNaN(zoom) )
 				throw ErrorInvalidArguments();
 
-			var	resolution = this.resolution(zoom),
+			var	resolution = this.resolution(zoom, tileSize),
 				mercX = pixel.x() * resolution.width() - this.halfEquator,
 				mercY = pixel.y() * resolution.height() - this.halfEquator;
 
@@ -536,10 +618,31 @@ Point(37.6, 55.8);
 		 * @param {Pixel} pixel Pixel coordinates. **Required**
 		 * @param {Number} zoom Zoom level for convertation. **Required**
 		 * @param {Size} [tileSize] Size of tile.
-		 * @returns {TilePixel} Tile index and pixel coordinates in tile
+		 * @returns {Tile} Tile instance.
 		 */
 		pixelToTile: function(pixel, zoom, tileSize) {
-			// todo
+			var	size = tileSize || this.tileSize;
+
+			return Tile(
+				Math.floor(pixel.x() / size.width()), // tx
+				Math.pow(2, zoom) - Math.floor(pixel.y() / size.height()) - 1, // ty
+				zoom, // tz
+				{
+					tpx: (pixel.x() < 0 ? size.width() : 0) + (pixel.x() % size.width()),
+					tpy: Math.floor(size.height() - pixel.y() % size.height()),
+					pixel: pixel
+				}
+			);
+		},
+		/**
+		 * Converts the radian number to the equivalent number in degrees
+		 * @since 0.0.1
+		 * @param {Number} ang Radian value
+		 * @returns {Number} Degrees value
+		 * @ignore
+		 */
+		radToDeg: function(rad) {
+			return rad * 180 / Math.PI;
 		},
 		/**
 		 * Calculate pixel resolution for given zoom level and tile size
@@ -559,6 +662,204 @@ Point(37.6, 55.8);
 			);
 		}
 	};
+	/**
+	 * Layers API abstract class
+	 * @class
+	 * @name Layer
+	 * @since 0.0.1
+	 */
+	function Layer() {
+		
+	};
+
+	Layer.prototype = {
+		/**
+		 * Return layer projection
+		 * @since 0.0.1
+		 * @ignore
+		 */
+		prj: function() {
+			return this.__prj || (this.map ? this.map.prj() : null);
+		},
+		/**
+		 * Returns layer reference point
+		 * @since 0.0.1
+		 * @ignore
+		 */
+		rp: function() {
+			if ( this.__prj )
+				return; // todo layer self projections
+
+			if ( this.map )
+				return this instanceof TileLayer 
+					? this.map.prj().pixelToTile(this.map.rp(), this.map.zoom(), this.tileSize)
+					: this.map.rp();
+		}
+	};
+	/**
+	 * Create new tile layers
+	 * @class
+	 * @name TileLayer
+	 * @since 0.0.1
+	 * @param {Object} opts Layer options. **Required**
+	 * @param {String|Function} opts.url URL template or URL handler for create tile URL.  **Required**
+	 * @param {Map} [map] Map instance.
+	 * @param {Number} [z] zIndex of layer, default - 1.
+	 * @param {Size} [tileSize] Size of tile, default - swift.Size(256, 256).
+	 * @param {String} [name] Name of layer.
+	 * @see [Cloudmade Tile API](http://developers.cloudmade.com/projects/tiles/documents)
+	 * @example
+```
+var	map = swift.Map( document.body );
+
+// First case
+TileLayer({
+	map: map,
+	url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
+});
+
+// Second case
+TileLayer({
+	map: map,
+	url: function(x, y, z) {
+		return 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/'+z+'/'+x+'/'+y+'.png'
+	}
+});
+
+// Third case
+map.add( 
+	TileLayer({
+		url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
+	})
+);
+```
+	 */
+	function TileLayer(opts) {
+		if ( !(this instanceof TileLayer) )
+			return new TileLayer(opts);
+
+		// Handle options
+		opts = opts || {};
+		if ( !opts.url )
+			throw ErrorInvalidArguments();
+
+		utils.mixin(this, {
+			map: null,
+			name: '',
+			tileSize: this.defaultTileSize,
+			z: this.defaultZ
+		}, opts);
+
+		// Create layer node
+		this._node = utils.node('div', '', '', {
+			position: 'absolute',
+			left: 0,
+			top: 0
+		});
+
+		this.update();
+	};
+
+	utils.extend(Layer, TileLayer,
+	/** @lends TileLayer.prototype */
+	{
+		defaultZ: 1,
+		defaultTileSize: new Size(256, 256),
+		
+		/**
+		 * Rebuild tiles in layer
+		 * @since 0.0.1
+		 * @returns {TileLayer} Returns TileLayer instance
+		 */
+		rebuild: function() {
+			if ( !this.map )
+				return;
+
+			var	rpt = this.rp(), // Tile for reference point of layer
+				vp = this.map.vp(), // Map viewport
+				vpc = vp.center(), // Center of map viewport
+				tileWidth = this.tileSize.width(),
+				tileHeight = this.tileSize.height(),
+				rptTop = vpc.y() - rpt.tpy, // Top position for tile of reference point
+				rptLeft = vpc.x() - rpt.tpx, // Left position for tile of reference point
+				reserveX = Math.ceil(vp.width() / tileWidth / 2),
+				reserveY = Math.ceil(vp.height() / tileHeight / 2),
+				txMin = rpt.tx - reserveX, // Minimal tile x-index
+				txMax = rpt.tx + reserveX, // Maximum tile x-index
+				tyMin = rpt.ty - reserveY, // Minimal tile y-index
+				tyMax = rpt.ty + reserveY, // Maximum tile y-index
+				tx, ty;
+
+			/*
+			console.log(
+				'reserveX', reserveX,
+				'reserveY', reserveY,
+				'txMin', txMin,
+				'txMax', txMax,
+				'tyMin', tyMin,
+				'tyMax', tyMax
+			);
+			*/
+
+			for (tx = txMin; tx <= txMax; tx++) {
+				for (ty = tyMin; ty <= tyMax; ty++) {
+					this._node.appendChild( this.tileNode(
+						Tile(tx, ty, rpt.tz, {
+							
+						}), {
+							position: 'absolute',
+							top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
+							left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
+						}
+					) );
+				}
+			}
+		},
+		/**
+		 * Return tile node
+		 * @since 0.0.1
+		 * @param {Tile} tile Tile instance. **Required**
+		 * @param {Object} [styles] Styles for tile position.
+		 * @returns {HTMLElement} Tile node
+		 * @ignore
+		 */
+		tileNode: function(tile, styles) {
+			return utils.node('img', '', {
+				src: this.url(tile.tnx, tile.tny, tile.tz),
+				width: this.tileSize.width(),
+				height: this.tileSize.height()
+			}, styles);
+		},
+		/**
+		 * Update layer options and rebuild layer
+		 * @since 0.0.1
+		 * @param {Object} opts Options for TileLayer class
+		 * @returns {TileLayer} Returns TileLayer instance
+		 */
+		update: function(opts) {
+			utils.mixin(this, opts || {});
+
+			// Rewrite url option as handler, if given a string
+			if ( !(this.url instanceof Function) ) {
+				this.urltpl = this.url.toString();
+				/** @ignore */
+				this.url = function(x, y, z) {
+					return utils.tmpl(this.urltpl, {
+						x: x,
+						y: y,
+						z: z
+					});
+				};
+			}
+
+			// Add layer node
+			if ( this.map instanceof Map )
+				this.map._layers.appendChild(this._node);
+
+			// Rebuild tiles
+			this.rebuild();
+		}
+	});
 	/**
 	 * Create a new map instance
 	 * @class
@@ -594,24 +895,37 @@ swift.Map(document.body, {
 		utils
 			.reprop(opts, 'center')
 			.reprop(opts, 'zoom')
+			.reprop(opts, 'prj')
 			.mixin(this, {
+				__rp: null,
+				__prj: ProjectionDefault(),
+				__vp: null,
+				background: this.defaultBackground,
 				layers: [],
 				constrols: []
 			}, opts);
 
+		// Strong validation for zoom and center options
 		this.zoom(opts.__zoom || this.defaultZoom);
 		this.center(opts.__center || this.defaultCenter);
 
+		// Prepare node
 		if ( node.nodeType !== 1 )
 			throw ErrorInvalidArguments();
 
-		// Prepare node
 		var	nodeStylePosition = utils.computed(node, 'position');
 		utils.css(node, {
 			background: this.background,
-			position: nodeStylePosition === 'static' ? 'relative' : nodeStylePosition
+			position: nodeStylePosition === 'static' ? 'relative' : nodeStylePosition,
+			overflow: 'hidden'
 		});
 		this._node = node;
+
+		// Calculate map viewport
+		this.vp(true);
+
+		// Calculate map reference point
+		this.rp(true);
 
 		// Init layers
 		this._layers = utils.node('div', '', '', {
@@ -620,6 +934,11 @@ swift.Map(document.body, {
 			top: 0
 		});
 		node.appendChild(this._layers);
+
+		TileLayer({
+			map: this,
+			url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
+		});
 
 		// Init events handling
 
@@ -630,16 +949,36 @@ swift.Map(document.body, {
 	utils.extend(EventCover, Map,
 	/** @lends Map.prototype */
 	{
-		background: '#eee',
+		defaultBackground: '#eee',
 		defaultZoom: 10,
 		defaultCenter: Point(37.617633, 55.755786),
 		minZoom: 1,
 		maxZoom: 17,
+
+		/**
+		 * Add various objects on map
+		 * @since 0.0.1
+		 * @param {Layer} obj Object for adding. **Required**
+		 * @returns {Map} Returns map instance
+		 */
+		add: function(obj) {
+			
+		},
+		/**
+		 * Set bounds of the map, or return bounds
+		 * @since 0.0.1
+		 * @param {Bounds} [bounds] Bounds object.
+		 * @returns {Map} Returns map instance, if the parameter not passed
+		 * @returns {Bounds} Returns bounds of the map, if the parameter passed
+		 */
+		bounds: function(bounds) {
+			// todo
+		},
 		/**
 		 * Set center of the map, or return center
 		 * @since 0.0.1
 		 * @param {Point} [center] Center of the map.
-		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Map} Returns map instance, if the parameter not passed
 		 * @returns {Point} Returns center of the map, if the parameter passed
 		 */
 		center: function(center) {
@@ -653,14 +992,12 @@ swift.Map(document.body, {
 			return this;
 		},
 		/**
-		 * Set bounds of the map, or return bounds
+		 * Returns map projection
 		 * @since 0.0.1
-		 * @param {Bounds} [bounds] Bounds object.
-		 * @returns {Map} Returns map object, if the parameter not passed
-		 * @returns {Bounds} Returns bounds of the map, if the parameter passed
+		 * @ignore
 		 */
-		bounds: function(bounds) {
-			// todo
+		prj: function() {
+			return this.__prj;
 		},
 		/**
 		 * Remove map object and all DOM elements of map
@@ -671,10 +1008,59 @@ swift.Map(document.body, {
 			// todo
 		},
 		/**
+		 * Returns map reference point
+		 * @since 0.0.1
+		 * @param {Boolean} [calc] If true, than reference point calculated again, default - false.
+		 * @returns {Pixel} Returns Pixel instance for map reference point
+		 * @ignore
+		 */
+		rp: function(calc) {
+			if ( calc ) {
+				this.__rp = this.prj().geoToPixel(
+					this.center(),
+					this.zoom()
+				);
+			};
+			return this.__rp;
+		},
+		/**
+		 * Short string for current state of the map
+		 * @since 0.0.1
+		 * @returns {String}
+		 */
+		toString: function() {
+			return 'Swift Map';
+			//return 'Swift Map, zoom: ${__zoom}, center: ${__center}';
+		},
+		/**
+		 * Update map options
+		 * @since 0.0.1
+		 * @param {Object} [opts] Map options.
+		 * @returns {Map} Returns map instance
+		 */
+		update: function(opts) {
+			// todo
+		},
+		/**
+		 * Returns map viewport
+		 * @since 0.0.1
+		 * @param {Boolean} [calc] If true, than viewport calculated again for map, default - false.
+		 * @returns {Size} Returns Size instance for map viewport
+		 * @ignore
+		 */
+		vp: function(calc) {
+			if ( calc )
+				this.__vp = Size(
+					this._node.offsetWidth,
+					this._node.offsetHeight
+				);
+			return this.__vp;
+		},
+		/**
 		 * Set zoom of the map, or return zoom level
 		 * @since 0.0.1
 		 * @param {Number} [zoom] Zoom level of the map.
-		 * @returns {Map} Returns map object, if the parameter not passed
+		 * @returns {Map} Returns map instance, if the parameter not passed
 		 * @returns {Number} Returns number of zoom level, if the parameter passed
 		 */
 		zoom: function(zoom) {
@@ -693,7 +1079,7 @@ swift.Map(document.body, {
 		/**
 		 * Increased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returns map object
+		 * @returns {Map} Returns map instance
 		 */
 		zoomIn: function() {
 			// todo
@@ -701,27 +1087,9 @@ swift.Map(document.body, {
 		/**
 		 * Decreased zoom level
 		 * @since 0.0.1
-		 * @returns {Map} Returns map object
+		 * @returns {Map} Returns map instance
 		 */
 		zoomOut: function() {
-			// todo
-		},
-		/**
-		 * Short string for current state of the map
-		 * @since 0.0.1
-		 * @returns {String}
-		 */
-		toString: function() {
-			return 'Swift Map';
-			//return 'Swift Map, zoom: ${__zoom}, center: ${__center}';
-		},
-		/**
-		 * Update map options
-		 * @since 0.0.1
-		 * @param {Object} [opts] Map options.
-		 * @returns {Map} Returns map object
-		 */
-		update: function(opts) {
 			// todo
 		}
 	});
@@ -731,12 +1099,15 @@ swift.Map(document.body, {
 	 */
 	var swift = {
 		// Classes
-		ProjectionDefault: ProjectionDefault,
 		EventCover: EventCover,
-		Size: Size,
-		Point: Point,
-		Pixel: Pixel,
+		Layer: Layer,
 		Map: Map,
+		Pixel: Pixel,
+		Point: Point,
+		ProjectionDefault: ProjectionDefault,
+		Size: Size,
+		Tile: Tile,
+		TileLayer: TileLayer,
 
 		// Namespaces
 		utils: utils,

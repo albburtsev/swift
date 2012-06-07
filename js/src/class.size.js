@@ -19,18 +19,15 @@
 
 	Size.prototype = {
 		/**
-		 * Set a new width, or return current
+		 * Returns center of area
 		 * @since 0.0.1
-		 * @param {Number} [width] New width.
-		 * @returns {Size} Returns size object, if the parameter not passed.
-		 * @returns {Number} Returns width, if the parameter passed.
+		 * @returns {Pixel} Pixel instance for center
 		 */
-		width: function(width) {
-			if ( width === undefined )
-				return this.__w;
-
-			this.__w = this.valid(width);
-			return this;
+		center: function() {
+			return Pixel(
+				this.width() / 2,
+				this.height() / 2
+			);
 		},
 		/**
 		 * Set a new height, or return current
@@ -58,5 +55,19 @@
 			if ( isNaN(val) )
 				throw ErrorInvalidArguments();
 			return val;
+		},
+		/**
+		 * Set a new width, or return current
+		 * @since 0.0.1
+		 * @param {Number} [width] New width.
+		 * @returns {Size} Returns size object, if the parameter not passed.
+		 * @returns {Number} Returns width, if the parameter passed.
+		 */
+		width: function(width) {
+			if ( width === undefined )
+				return this.__w;
+
+			this.__w = this.valid(width);
+			return this;
 		}
 	};

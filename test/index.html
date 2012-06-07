@@ -46,6 +46,10 @@
 				raises(function() { prj.pixelToGeo(); }, 'prj.pixelToGeo() throw error, ok');
 				raises(function() { prj.pixelToGeo(pixel); }, 'prj.pixelToGeo(pixel) throw error, ok');
 				ok( prj.pixelToGeo(pixel, zoom) instanceof swift.Point, 'Method pixelToGeo() return Point instance' );
+				
+				// Method geoToTile()
+				raises(function() { prj.geoToTile(); }, 'prj.geoToTile() throw error, ok');
+				ok( prj.geoToTile(point, zoom) instanceof swift.Tile, 'Method geoToTile() return Tile instance' );
 			});
 
 			test('Class Size', function() {
@@ -110,6 +114,22 @@
 
 				strictEqual(swift.Point(190, 0).lon(), -170, 'Longitude max extent correctly');
 				strictEqual(swift.Point(-190, 0).lon(), 170, 'Longitude min extent correctly');
+			});
+
+			test('Class Tile', function() {
+				ok( swift.Tile instanceof Function, 'Class Tile exist' );
+				ok( new swift.Tile() instanceof swift.Tile, 'Constructor successful called with "new"' );
+				ok( swift.Tile() instanceof swift.Tile, 'Constructor successful called without "new"' );
+			});
+
+			test('Class TileLayer', function() {
+				var	url = 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png';
+				ok( swift.TileLayer instanceof Function, 'Class TileLayer exist' );
+				ok( new swift.TileLayer({ url: url }) instanceof swift.TileLayer, 'Constructor successful called with "new"' );
+				ok( swift.TileLayer({ url: url }) instanceof swift.TileLayer, 'Constructor successful called without "new"' );
+				ok( swift.TileLayer({ url: url }) instanceof swift.Layer, 'Successful class Layer inherits' );
+				
+				raises(function() { swift.TileLayer(); }, 'TileLayer call without parameter node throw error, ok');
 			});
 
 			test('Class Map', function() {

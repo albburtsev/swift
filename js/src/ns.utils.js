@@ -8,6 +8,25 @@
 	/** @lends utils */ 
 	{
 		/**
+		 * Add attributes for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [attr] Object with attributes
+		 * @returns {Object} Returns namespace utils
+		 */
+		attr: function(node, attr) {
+			this.each(attr || {}, function(name, value) {
+				if ( name.match(/^on/) ) {
+					node[name] = value;
+				} else {
+					var	dattr = document.createAttribute(name);
+					dattr.value = value;
+					node.setAttributeNode(dattr);
+				}
+			});
+			return this;
+		},
+		/**
 		 * Get value of computed style for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -15,10 +34,12 @@
 		 * @returns {String} Value of computed style
 		 */
 		computed: function(node, prop) {
-			if ( !window.getComputedStyle )
-				window.getComputedStyle = function(el) {
+			if ( !window.getComputedStyle ) {
+				/** @ignore */
+				var gcs = function(el) {
 					var	re = /(\-([a-z]){1})/g;
 					this.el = el;
+					/** @ignore */
 					this.getPropertyValue = function(prop) {
 						if ( prop == 'float' )
 							prop = 'styleFloat';
@@ -30,6 +51,8 @@
 					};
 					return this;
 				};
+				window.getComputedStyle = gcs;
+			}
 			return getComputedStyle(node).getPropertyValue(prop);
 		},
 		/**
@@ -43,6 +66,7 @@
 			this.each(styles || {}, function(prop, value) {
 				node.style[prop] = value;
 			});
+			return this;
 		},
 		/**
 		 * Objects iterator
@@ -104,9 +128,18 @@
 			var	node = document.createElement(name || 'div');
 			node.innerHTML = html || '';
 			this
-				//.attr(node, attr)
+				.attr(node, attr)
 				.css(node, styles);
 			return node;
+		},
+		/**
+		 * Find and return first not undefined argument
+		 * @since 0.0.1
+		 */
+		or: function() {
+			for (var i = 0; i < arguments.length; i++)
+				if ( arguments[i] !== undefined )
+					return arguments[i];
 		},
 		/**
 		 * Rewrite object property to technical name: __name

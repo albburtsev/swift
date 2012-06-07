@@ -23,6 +23,16 @@
 
 	ProjectionDefault.prototype = {
 		/**
+		 * Converts the number in degrees to the radian equivalent
+		 * @since 0.0.1
+		 * @param {Number} ang Degrees value
+		 * @returns {Number} Radian value
+		 * @ignore
+		 */
+		degToRad: function(deg) {
+			return deg * Math.PI / 180;
+		},
+		/**
 		 * Convert geographic coordinates to pixel coordinates
 		 * @since 0.0.1
 		 * @param {Point} point Geographic coordinates. **Required**
@@ -37,7 +47,7 @@
 
 			var	mercX = this.degToRad( point.lon() ) * this.radius,
 				mercY = Math.log(Math.tan(Math.PI / 4 + this.degToRad(point.lat()) / 2.0)) * this.radius,
-				resolution = this.resolution(zoom);
+				resolution = this.resolution(zoom, tileSize);
 
 			return Pixel(
 				(mercX + this.halfEquator) / resolution.width(),
@@ -45,38 +55,34 @@
 			);
 		},
 		/**
-		 * Converts the number in degrees to the radian equivalent
+		 * Convert geographic coordinates to tile coordinates
 		 * @since 0.0.1
-		 * @param {Number} ang Degrees value
-		 * @returns {Number} Radian value
-		 * @ignore
+		 * @param {Point} point Geographic coordinates. **Required**
+		 * @param {Number} zoom Zoom level for convertation. **Required**
+		 * @param {Size} [tileSize] Size of tile.
+		 * @returns {Tile} Tile instance.
 		 */
-		degToRad: function(deg) {
-			return deg * Math.PI / 180;
-		},
-		/**
-		 * Converts the radian number to the equivalent number in degrees
-		 * @since 0.0.1
-		 * @param {Number} ang Radian value
-		 * @returns {Number} Degrees value
-		 * @ignore
-		 */
-		radToDeg: function(rad) {
-			return rad * 180 / Math.PI;
+		geoToTile: function(point, zoom, tileSize) {
+			return this.pixelToTile(
+				this.geoToPixel(point, zoom, tileSize),
+				zoom,
+				tileSize
+			);
 		},
 		/**
 		 * Convert pixel coordinates to geographic coordinates
 		 * @since 0.0.1
 		 * @param {Pixel} pixel Pixel coordinates. **Required**
 		 * @param {Number} zoom Zoom level for convertation. **Required**
+		 * @param {Size} [tileSize] Size of tile.
 		 * @returns {Point} Geographic coordinates.
 		 */
-		pixelToGeo: function(pixel, zoom) {
+		pixelToGeo: function(pixel, zoom, tileSize) {
 			zoom = parseInt(zoom);
 			if ( !(pixel instanceof Pixel) || isNaN(zoom) )
 				throw ErrorInvalidArguments();
 
-			var	resolution = this.resolution(zoom),
+			var	resolution = this.resolution(zoom, tileSize),
 				mercX = pixel.x() * resolution.width() - this.halfEquator,
 				mercY = pixel.y() * resolution.height() - this.halfEquator;
 
@@ -91,10 +97,31 @@
 		 * @param {Pixel} pixel Pixel coordinates. **Required**
 		 * @param {Number} zoom Zoom level for convertation. **Required**
 		 * @param {Size} [tileSize] Size of tile.
-		 * @returns {TilePixel} Tile index and pixel coordinates in tile
+		 * @returns {Tile} Tile instance.
 		 */
 		pixelToTile: function(pixel, zoom, tileSize) {
-			// todo
+			var	size = tileSize || this.tileSize;
+
+			return Tile(
+				Math.floor(pixel.x() / size.width()), // tx
+				Math.pow(2, zoom) - Math.floor(pixel.y() / size.height()) - 1, // ty
+				zoom, // tz
+				{
+					tpx: (pixel.x() < 0 ? size.width() : 0) + (pixel.x() % size.width()),
+					tpy: Math.floor(size.height() - pixel.y() % size.height()),
+					pixel: pixel
+				}
+			);
+		},
+		/**
+		 * Converts the radian number to the equivalent number in degrees
+		 * @since 0.0.1
+		 * @param {Number} ang Radian value
+		 * @returns {Number} Degrees value
+		 * @ignore
+		 */
+		radToDeg: function(rad) {
+			return rad * 180 / Math.PI;
 		},
 		/**
 		 * Calculate pixel resolution for given zoom level and tile size
