@@ -149,7 +149,7 @@
 		 * @returns {Object} Returns namespace utils
 		 */
 		reprop: function(obj, prop) {
-			if ( obj[prop] ) {
+			if ( obj[prop] !== undefined ) {
 				obj['__' + prop] = obj[prop];
 				delete obj[prop];
 			}

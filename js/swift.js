@@ -157,7 +157,7 @@
 		 * @returns {Object} Returns namespace utils
 		 */
 		reprop: function(obj, prop) {
-			if ( obj[prop] ) {
+			if ( obj[prop] !== undefined ) {
 				obj['__' + prop] = obj[prop];
 				delete obj[prop];
 			}
@@ -906,7 +906,7 @@ swift.Map(document.body, {
 			}, opts);
 
 		// Strong validation for zoom and center options
-		this.zoom(opts.__zoom || this.defaultZoom);
+		this.zoom( utils.or(opts.__zoom, this.defaultZoom) );
 		this.center(opts.__center || this.defaultCenter);
 
 		// Prepare node
@@ -952,7 +952,7 @@ swift.Map(document.body, {
 		defaultBackground: '#eee',
 		defaultZoom: 10,
 		defaultCenter: Point(37.617633, 55.755786),
-		minZoom: 1,
+		minZoom: 0,
 		maxZoom: 17,
 
 		/**
