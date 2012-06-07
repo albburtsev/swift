@@ -146,14 +146,17 @@
 				ok( new swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called with "new"' );
 				ok( swift.Map(mapNode) instanceof swift.Map, 'Constructor successful called without "new"' );
 				ok( mymap instanceof swift.EventCover, 'Successful class EventCover inherits' );
+				ok( swift.Map('mymap'), 'Map called with id string for node argument' );
 
 				// Instance Map checker
 				raises(function() { swift.Map(); }, 'Map call without parameter node throw error, ok');
 				raises(function() { swift.Map( mapNode, { center: 1 } ); }, 'Map option center = 1 throw error, ok');
 				raises(function() { swift.Map( mapNode, { zoom: 'b' } ); }, 'Map option zoom = "a" throw error, ok');
+				raises(function() { swift.Map( 'unexist' ); }, 'Node argument is a unexist id throw error, ok');
 				
-				strictEqual( swift.Map(mapNode, { zoom: 100 }).zoom(), 17, 'Zoom can not be more than maxZoom' );
-				strictEqual( swift.Map(mapNode, { zoom: -10 }).zoom(), 1, 'Zoom can not be less than minZoom' );
+				
+				strictEqual( swift.Map(mapNode, { zoom: 100 }).zoom(), swift.Map.prototype.maxZoom, 'Zoom can not be more than maxZoom' );
+				strictEqual( swift.Map(mapNode, { zoom: -10 }).zoom(), swift.Map.prototype.minZoom, 'Zoom can not be less than minZoom' );
 				//ok( mymap.center() instanceof swift.Point, 'mymap.center() instance of Point' );
 			});
 		});

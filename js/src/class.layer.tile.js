@@ -55,6 +55,7 @@ map.add(
 		// Create layer node
 		this._node = utils.node('div', '', {
 			position: 'absolute',
+			zIndex: this.z,
 			left: 0,
 			top: 0
 		});

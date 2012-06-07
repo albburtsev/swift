@@ -782,6 +782,7 @@ map.add(
 		// Create layer node
 		this._node = utils.node('div', '', {
 			position: 'absolute',
+			zIndex: this.z,
 			left: 0,
 			top: 0
 		});
@@ -902,7 +903,7 @@ map.add(
 	 * @name Map
 	 * @augments EventCover
 	 * @since 0.0.1
-	 * @param {HTMLElement} node HTML element for map placement. **Required**
+	 * @param {HTMLElement|String} node HTML element for map container or id attribute string. **Required**
 	 * @param {Object} [opts] Map options
 	 * @param {Number} [opts.zoom] Map zoom [1..17], default - 10.
 	 * @param {Point} [opts.center] Center of the map, default - swift.Point(37.617633, 55.755786).
@@ -946,6 +947,9 @@ swift.Map(document.body, {
 		this.center(opts.__center || this.defaultCenter);
 
 		// Prepare node
+		if ( typeof node === "string" )
+			node = document.getElementById(node);
+
 		if ( node.nodeType !== 1 )
 			throw ErrorInvalidArguments();
 
@@ -973,7 +977,8 @@ swift.Map(document.body, {
 
 		TileLayer({
 			map: this,
-			url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
+			url: 'http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png'
+			//url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
 		});
 
 		// Init events handling
