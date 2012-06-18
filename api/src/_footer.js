@@ -25,11 +25,16 @@
 swift.ns(window);
 new Map(document.body);
 // or
-swift.ns('sweet');
+swift.alias('sweet');
 new sweet.Map(document.body);
 		 */
-		ns: function(ns) {
-			// todo
+		alias: function(ns) {
+			if ( typeof ns === 'string' )
+				ns = window[ns] = {};
+
+			utils.each(swift, function(prop, value) {
+				ns[prop] = value;
+			});
 		}
 	};
 

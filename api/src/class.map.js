@@ -35,12 +35,12 @@ swift.Map(document.body, {
 			.reprop(opts, 'zoom')
 			.reprop(opts, 'prj')
 			.mixin(this, {
-				__rp: null,
 				__prj: ProjectionDefault(),
+				__rp: null,
 				__vp: null,
 				background: this.defaultBackground,
-				layers: [],
-				constrols: []
+				constrols: [],
+				layers: []
 			}, opts);
 
 		// Strong validation for zoom and center options
@@ -76,11 +76,10 @@ swift.Map(document.body, {
 		});
 		node.appendChild(this._layers);
 
-		TileLayer({
-			map: this,
-			url: 'http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png'
-			//url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
-		});
+		this.add(
+			TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png')
+			//TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png')
+		);
 
 		// Init events handling
 
@@ -100,11 +99,16 @@ swift.Map(document.body, {
 		/**
 		 * Add various objects on map
 		 * @since 0.0.1
-		 * @param {Layer} obj Object for adding. **Required**
+		 * @param {TileLayer} instance Instance for adding. **Required**
 		 * @returns {Map} Returns map instance
 		 */
-		add: function(obj) {
-			
+		add: function(instance) {
+			// Add TileLayer instance
+			if ( instance instanceof TileLayer )
+				instance.update({ map: this });
+			// Invalid instance
+			else
+				throw ErrorInvalidArguments();
 		},
 		/**
 		 * Set bounds of the map, or return bounds
@@ -131,6 +135,17 @@ swift.Map(document.body, {
 				throw ErrorInvalidArguments();
 
 			this.__center = center;
+			return this;
+		},
+		/**
+		 * Remove all layers from the map
+		 * @since 0.0.1
+		 * @returns {Map} Returns map instance
+		 */
+		empty: function() {
+			for (var i = 0; i < this.layers.length; i++)
+				this.layers[i].remove();
+			this.layers.length = 0;
 			return this;
 		},
 		/**

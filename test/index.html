@@ -5,14 +5,21 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>qUnit Tests</title>
 		<link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" />
-		<script src="../js/swift.js"></script>
+		<script src="../api/swift.js"></script>
 		<script src="http://code.jquery.com/jquery-latest.js"></script>
 		<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
 		<script>
 		$(function() {
 			test('Namespace swift', function() {
 				ok( !!window.swift, 'Namespace swift exist' );
-				ok( swift.ns instanceof Function, 'Method swift.ns() exist' );
+				ok( swift.alias instanceof Function, 'Method swift.ns() exist' );
+
+				swift.alias('S');
+				ok( S.Map === swift.Map, 'Namespace "S" successful added' );
+
+				var sweet = {};
+				swift.alias(sweet);
+				ok( sweet.Map === swift.Map, 'Namespace "sweet" successful added' );
 			});
 
 			test('Namespace swift.utils', function() {
@@ -153,11 +160,16 @@
 				raises(function() { swift.Map( mapNode, { center: 1 } ); }, 'Map option center = 1 throw error, ok');
 				raises(function() { swift.Map( mapNode, { zoom: 'b' } ); }, 'Map option zoom = "a" throw error, ok');
 				raises(function() { swift.Map( 'unexist' ); }, 'Node argument is a unexist id throw error, ok');
-				
-				
+
+				// Method zoom()
 				strictEqual( swift.Map(mapNode, { zoom: 100 }).zoom(), swift.Map.prototype.maxZoom, 'Zoom can not be more than maxZoom' );
 				strictEqual( swift.Map(mapNode, { zoom: -10 }).zoom(), swift.Map.prototype.minZoom, 'Zoom can not be less than minZoom' );
-				//ok( mymap.center() instanceof swift.Point, 'mymap.center() instance of Point' );
+				
+				// Methos center()
+				ok( mymap.center() instanceof swift.Point, 'mymap.center() returns instance of Point' );
+				
+				// Methos empty()
+				ok( mymap.empty() instanceof swift.Map, 'mymap.empty() returns instance of Map' );
 			});
 		});
 		</script>

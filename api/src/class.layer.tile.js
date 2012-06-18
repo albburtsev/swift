@@ -3,8 +3,8 @@
 	 * @class
 	 * @name TileLayer
 	 * @since 0.0.1
-	 * @param {Object} opts Layer options. **Required**
-	 * @param {String|Function} opts.url URL template or URL handler for create tile URL.  **Required**
+	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
+	 * @param {Object} [opts] Layer options.
 	 * @param {Map} [map] Map instance.
 	 * @param {Number} [z] zIndex of layer, default - 1.
 	 * @param {Size} [tileSize] Size of tile, default - swift.Size(256, 256).
@@ -15,40 +15,39 @@
 var	map = swift.Map( document.body );
 
 // First case
-TileLayer({
-	map: map,
-	url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
-});
+TileLayer(
+	'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png',
+	{ map: map }
+);
 
 // Second case
-TileLayer({
-	map: map,
-	url: function(x, y, z) {
+TileLayer(
+	function(x, y, z) {
 		return 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/'+z+'/'+x+'/'+y+'.png'
-	}
-});
+	},
+	{ map: map }
+);
 
 // Third case
-map.add( 
-	TileLayer({
-		url: 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png'
-	})
+map.add(
+	TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png')
 );
 ```
 	 */
-	function TileLayer(opts) {
+	function TileLayer(url, opts) {
 		if ( !(this instanceof TileLayer) )
-			return new TileLayer(opts);
+			return new TileLayer(url, opts);
 
 		// Handle options
 		opts = opts || {};
-		if ( !opts.url )
+		if ( !url )
 			throw ErrorInvalidArguments();
 
 		utils.mixin(this, {
 			map: null,
 			name: '',
 			tileSize: this.defaultTileSize,
+			url: url,
 			z: this.defaultZ
 		}, opts);
 
@@ -147,7 +146,11 @@ map.add(
 		 * @returns {TileLayer} Returns TileLayer instance
 		 */
 		update: function(opts) {
-			utils.mixin(this, opts || {});
+			opts = opts || {};
+
+			if ( opts.map && opts.map !== this.map ); // todo
+
+			utils.mixin(this, opts);
 
 			// Rewrite url option as handler, if given a string
 			if ( !(this.url instanceof Function) ) {
@@ -162,9 +165,20 @@ map.add(
 				};
 			}
 
-			// Add layer node
-			if ( this.map instanceof Map )
-				this.map._layers.appendChild(this._node);
+			// Add layer node and layer instance to map
+			var	map  = this.map,
+				added = false;
+
+			if ( map instanceof Map ) {
+				for (var i = 0; i < map.layers.length; i++)
+					if ( map.layers[i] === this )
+						added = true;
+
+				if ( !added ) {
+					map.layers.push( this );
+					map._layers.appendChild(this._node);
+				}
+			}
 
 			// Rebuild tiles
 			this.rebuild();
