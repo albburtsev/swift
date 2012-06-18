@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Mon Jun 18 2012 21:34:57 GMT+0400 (MSD)
+ * Date: Mon Jun 18 2012 21:41:05 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
