@@ -5,10 +5,7 @@
 	 * @since 0.0.1
 	 */
 	function Layer() {
-		/*
-		 * Required layer properties:
-		 * _node {HTMLElement} layer node
-		 */
+		
 	};
 
 	Layer.prototype = {
@@ -32,15 +29,5 @@
 				return true;
 			}
 			return false;
-		},
-		/**
-		 * Returns layer reference point
-		 * @since 0.0.1
-		 * @ignore
-		 */
-		rp: function() {
-			return this.map
-				? this.prj().geoToTile(this.map.center(), this.map.zoom(), this.tileSize)
-				: null;
 		}
 	};

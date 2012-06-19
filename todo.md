@@ -1,5 +1,6 @@
 # TODO
 
+ * Change type of option 'tileSize' to {Number}, now - {Size}
  * Do async call for layer initializing
  * Add option 'opacity' for class TileLayer
  * Add section /examples
@@ -17,3 +18,4 @@
  * Add method empty() for class Map (remove all existing layers for map instance)
  * Add map instance changing for method update() in class TileLayer
  * Rename "/js" to "/api"
+ * Add option 'zoomShift' for class TileLayer

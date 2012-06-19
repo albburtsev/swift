@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Mon Jun 18 2012 21:41:05 GMT+0400 (MSD)
+ * Date: Tue Jun 19 2012 20:15:08 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -705,10 +705,7 @@ Point(37.6, 55.8);
 	 * @since 0.0.1
 	 */
 	function Layer() {
-		/*
-		 * Required layer properties:
-		 * _node {HTMLElement} layer node
-		 */
+		
 	};
 
 	Layer.prototype = {
@@ -732,16 +729,6 @@ Point(37.6, 55.8);
 				return true;
 			}
 			return false;
-		},
-		/**
-		 * Returns layer reference point
-		 * @since 0.0.1
-		 * @ignore
-		 */
-		rp: function() {
-			return this.map
-				? this.prj().geoToTile(this.map.center(), this.map.zoom(), this.tileSize)
-				: null;
 		}
 	};
 	/**
@@ -751,10 +738,10 @@ Point(37.6, 55.8);
 	 * @since 0.0.1
 	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
 	 * @param {Object} [opts] Layer options.
-	 * @param {Map} [map] Map instance.
-	 * @param {Number} [z] zIndex of layer, default - 1.
-	 * @param {Size} [tileSize] Size of tile, default - swift.Size(256, 256).
-	 * @param {String} [name] Name of layer.
+	 * @param {Map} [opts.map] Map instance.
+	 * @param {Number} [opts.z] zIndex of layer, default - 1.
+	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
+	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
 	 * @see [Cloudmade Tile API](http://developers.cloudmade.com/projects/tiles/documents)
 	 * @example
 ```
@@ -794,7 +781,8 @@ map.add(
 			name: '',
 			tileSize: this.defaultTileSize,
 			url: url,
-			z: this.defaultZ
+			z: this.defaultZ,
+			zoomShift: 0
 		}, opts);
 
 		// Create layer node
@@ -869,6 +857,20 @@ map.add(
 
 			// Memory leak fix
 			rpt = prj = vp = vpc = tile = null;
+		},
+		/**
+		 * Returns layer reference point
+		 * @since 0.0.1
+		 * @ignore
+		 */
+		rp: function() {
+			return this.map
+				? this.prj().geoToTile(
+					this.map.center(),
+					this.map.zoom() + this.zoomShift,
+					this.tileSize
+				)
+				: null;
 		},
 		/**
 		 * Return tile node
