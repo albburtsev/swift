@@ -53,7 +53,7 @@ map.add(
 		}, opts);
 
 		// Create layer node
-		this._node = utils.node('div', '', {
+		this._node = dom.node('div', '', {
 			position: 'absolute',
 			zIndex: this.z,
 			left: 0,
@@ -148,7 +148,7 @@ map.add(
 		 * @ignore
 		 */
 		tileNode: function(tile, styles) {
-			return utils.node('img', {
+			return dom.node('img', {
 				src: this.url(tile.tnx, tile.tny, tile.tz),
 				width: this.tileSize.width(),
 				height: this.tileSize.height()

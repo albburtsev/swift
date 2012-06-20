@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Wed Jun 20 2012 17:11:54 GMT+0400 (MSD)
+ * Date: Wed Jun 20 2012 17:30:47 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -36,25 +36,6 @@
 			return this;
 		},
 		/**
-		 * Add attributes for given node
-		 * @since 0.0.1
-		 * @param {HTMLElement} node **Required**
-		 * @param {Object} [attr] Object with attributes
-		 * @returns {Object} Returns namespace utils
-		 */
-		attr: function(node, attr) {
-			this.each(attr || {}, function(name, value) {
-				if ( name.match(/^on/) ) {
-					node[name] = value;
-				} else {
-					var	dattr = document.createAttribute(name);
-					dattr.value = value;
-					node.setAttributeNode(dattr);
-				}
-			});
-			return this;
-		},
-		/**
 		 * Get value of computed style for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -82,19 +63,6 @@
 				window.getComputedStyle = gcs;
 			}
 			return getComputedStyle(node).getPropertyValue(prop);
-		},
-		/**
-		 * Add styles for given node
-		 * @since 0.0.1
-		 * @param {HTMLElement} node **Required**
-		 * @param {Object} [styles] Object with styles
-		 * @returns {Object} Returns namespace utils
-		 */
-		css: function(node, styles) {
-			this.each(styles || {}, function(prop, value) {
-				node.style[prop] = value;
-			});
-			return this;
 		},
 		/**
 		 * Objects iterator
@@ -144,21 +112,6 @@
 			return target;
 		},
 		/**
-		 * Create HTML-elements
-		 * @since 0.0.1
-		 * @param {String} [name] Element name, default - 'div'
-		 * @param {Object} [attr] Object with attribites.
-		 * @param {Object} [styles] Object with styles.
-		 * @returns {HTMLElement} Element
-		 */
-		node: function(name, attr, styles) {
-			var	node = document.createElement(name || 'div');
-			this
-				.attr(node, attr)
-				.css(node, styles);
-			return node;
-		},
-		/**
 		 * Find and return first not undefined argument
 		 * @since 0.0.1
 		 */
@@ -198,6 +151,63 @@
 				});
 
 			return out;
+		}
+	};
+	/**
+	 * Namespace for DOM manipulation
+	 * @namespace
+	 * @name dom
+	 * @since 0.0.1
+	 */
+	var	dom =
+	/** @lends dom */ 
+	{
+		/**
+		 * Add attributes for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [attr] Object with attributes
+		 * @returns {Object} Returns namespace utils
+		 */
+		attr: function(node, attr) {
+			utils.each(attr || {}, function(name, value) {
+				if ( name.match(/^on/) ) {
+					node[name] = value;
+				} else {
+					var	dattr = document.createAttribute(name);
+					dattr.value = value;
+					node.setAttributeNode(dattr);
+				}
+			});
+			return this;
+		},
+		/**
+		 * Add styles for given node
+		 * @since 0.0.1
+		 * @param {HTMLElement} node **Required**
+		 * @param {Object} [styles] Object with styles
+		 * @returns {Object} Returns namespace utils
+		 */
+		css: function(node, styles) {
+			utils.each(styles || {}, function(prop, value) {
+				node.style[prop] = value;
+			});
+			return this;
+		},
+		/**
+		 * Create HTML-elements
+		 * @since 0.0.1
+		 * @param {String} [name] Element name, default - 'div'
+		 * @param {Object} [attr] Object with attribites.
+		 * @param {Object} [styles] Object with styles.
+		 * @returns {HTMLElement} Element
+		 */
+		node: function(name, attr, styles) {
+			var	node = document.createElement(name || 'div');
+			this
+				.attr(node, attr)
+				.css(node, styles);
+			return node;
 		}
 	};
 	/**
@@ -800,7 +810,7 @@ map.add(
 		}, opts);
 
 		// Create layer node
-		this._node = utils.node('div', '', {
+		this._node = dom.node('div', '', {
 			position: 'absolute',
 			zIndex: this.z,
 			left: 0,
@@ -895,7 +905,7 @@ map.add(
 		 * @ignore
 		 */
 		tileNode: function(tile, styles) {
-			return utils.node('img', {
+			return dom.node('img', {
 				src: this.url(tile.tnx, tile.tny, tile.tz),
 				width: this.tileSize.width(),
 				height: this.tileSize.height()
@@ -1005,7 +1015,7 @@ swift.Map(document.body, {
 			throw ErrorInvalidArguments();
 
 		var	nodeStylePosition = utils.computed(node, 'position');
-		utils.css(node, {
+		dom.css(node, {
 			background: this.background,
 			position: nodeStylePosition === 'static' ? 'relative' : nodeStylePosition,
 			overflow: 'hidden'
@@ -1019,7 +1029,7 @@ swift.Map(document.body, {
 		this.rp(true);
 
 		// Init layers
-		this._layers = utils.node('div', '', {
+		this._layers = dom.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0

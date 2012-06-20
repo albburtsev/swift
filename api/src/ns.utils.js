@@ -21,25 +21,6 @@
 			return this;
 		},
 		/**
-		 * Add attributes for given node
-		 * @since 0.0.1
-		 * @param {HTMLElement} node **Required**
-		 * @param {Object} [attr] Object with attributes
-		 * @returns {Object} Returns namespace utils
-		 */
-		attr: function(node, attr) {
-			this.each(attr || {}, function(name, value) {
-				if ( name.match(/^on/) ) {
-					node[name] = value;
-				} else {
-					var	dattr = document.createAttribute(name);
-					dattr.value = value;
-					node.setAttributeNode(dattr);
-				}
-			});
-			return this;
-		},
-		/**
 		 * Get value of computed style for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -67,19 +48,6 @@
 				window.getComputedStyle = gcs;
 			}
 			return getComputedStyle(node).getPropertyValue(prop);
-		},
-		/**
-		 * Add styles for given node
-		 * @since 0.0.1
-		 * @param {HTMLElement} node **Required**
-		 * @param {Object} [styles] Object with styles
-		 * @returns {Object} Returns namespace utils
-		 */
-		css: function(node, styles) {
-			this.each(styles || {}, function(prop, value) {
-				node.style[prop] = value;
-			});
-			return this;
 		},
 		/**
 		 * Objects iterator
@@ -127,21 +95,6 @@
 					if ( arguments[i].hasOwnProperty(j) )
 						target[j] = arguments[i][j];
 			return target;
-		},
-		/**
-		 * Create HTML-elements
-		 * @since 0.0.1
-		 * @param {String} [name] Element name, default - 'div'
-		 * @param {Object} [attr] Object with attribites.
-		 * @param {Object} [styles] Object with styles.
-		 * @returns {HTMLElement} Element
-		 */
-		node: function(name, attr, styles) {
-			var	node = document.createElement(name || 'div');
-			this
-				.attr(node, attr)
-				.css(node, styles);
-			return node;
 		},
 		/**
 		 * Find and return first not undefined argument

@@ -1,7 +1,7 @@
 # TODO
 
  * Add option 'opacity' for class TileLayer
- * Add namespace 'dom' and transfer some methods from 'utils' to 'dom'
+ * Refactoring of algo for tile layer add
  * Add class Iterator
  * Rewrite tiles drawing with iterator instance
  
@@ -17,3 +17,4 @@
  * Add option 'zoomShift' for class TileLayer
  * Do async call for layer initializing
  * Add section /examples
+ * Add namespace 'dom' and transfer some methods from 'utils' to 'dom'

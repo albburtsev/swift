@@ -16,6 +16,7 @@ module.exports = function(grunt) {
 				src: [
 					'api/src/_header.js',
 					'api/src/ns.utils.js',
+					'api/src/ns.dom.js',
 					'api/src/class.error.js',
 					'api/src/class.event-cover.js',
 					'api/src/class.size.js',

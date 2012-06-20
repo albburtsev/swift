@@ -55,7 +55,7 @@ swift.Map(document.body, {
 			throw ErrorInvalidArguments();
 
 		var	nodeStylePosition = utils.computed(node, 'position');
-		utils.css(node, {
+		dom.css(node, {
 			background: this.background,
 			position: nodeStylePosition === 'static' ? 'relative' : nodeStylePosition,
 			overflow: 'hidden'
@@ -69,7 +69,7 @@ swift.Map(document.body, {
 		this.rp(true);
 
 		// Init layers
-		this._layers = utils.node('div', '', {
+		this._layers = dom.node('div', '', {
 			position: 'absolute',
 			left: 0,
 			top: 0
