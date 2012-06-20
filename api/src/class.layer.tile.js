@@ -6,9 +6,10 @@
 	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
 	 * @param {Object} [opts] Layer options.
 	 * @param {Map} [opts.map] Map instance.
-	 * @param {Number} [opts.z] zIndex of layer, default - 1.
 	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
 	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
+	 * @param {Number} [opts.z] zIndex of layer, default - 1.
+	 * @param {Number} [opts.opacity] Layer opacity [0..1], default - 1.
 	 * @see [Cloudmade Tile API](http://developers.cloudmade.com/projects/tiles/documents)
 	 * @example
 ```
@@ -46,6 +47,7 @@ map.add(
 		utils.mixin(this, {
 			map: null,
 			name: '',
+			opacity: 1,
 			tileSize: this.defaultTileSize,
 			url: url,
 			z: this.defaultZ,
@@ -57,7 +59,8 @@ map.add(
 			position: 'absolute',
 			zIndex: this.z,
 			left: 0,
-			top: 0
+			top: 0,
+			opacity: this.opacity
 		});
 
 		this.update();

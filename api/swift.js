@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Wed Jun 20 2012 17:30:47 GMT+0400 (MSD)
+ * Date: Wed Jun 20 2012 21:18:12 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -210,6 +210,52 @@
 			return node;
 		}
 	};
+	/**
+	 * Detects native implementations for css properties and not only it
+	 * @namespace
+	 * @name detect
+	 * @since 0.0.1
+	 */
+	var	detect =
+	/** @lends detect */ 
+	{
+		browser: undefined,
+		browserVersion: undefined,
+		transform: undefined
+	};
+
+	(function() {
+		var	i, item,
+			div = dom.node('div'),
+			userAgent = navigator.userAgent,
+			transforms = ['transform', 'MozTransform', 'WebkitTransform', 'OTransform', 'msTransform'],
+			browsers = [
+				['webkit', /(webkit)[ \/]([\w.]+)/i],
+				['opera', /(opera)(?:.*version)?[ \/]([\w.]+)/i],
+				['msie', /(msie) ([\w.]+)/i],
+				['mozilla', /(mozilla)(?:.*? rv:([\w.]+))?/i]
+			];
+
+		// Detect browser
+		for (i = 0; i < browsers.length; i++) {
+			item = browsers[i];
+			if ( item[1] = userAgent.match(item[1]) ) {
+				detect.browser = item[0];
+				if ( item[1][2] )
+					detect.browserVersion = parseFloat(item[1][2]) || false;
+				break;
+			}
+		}
+
+		// Detect transform properties
+		for (i = 0; i < transforms.length; i++) {
+			item = transforms[i];
+			if ( item in div.style ) {
+				detect.transform = item;
+				break;
+			}
+		}
+	})();
 	/**
 	 * Handle errors when given invalid arguments
 	 * @class
@@ -763,9 +809,10 @@ Point(37.6, 55.8);
 	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
 	 * @param {Object} [opts] Layer options.
 	 * @param {Map} [opts.map] Map instance.
-	 * @param {Number} [opts.z] zIndex of layer, default - 1.
 	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
 	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
+	 * @param {Number} [opts.z] zIndex of layer, default - 1.
+	 * @param {Number} [opts.opacity] Layer opacity [0..1], default - 1.
 	 * @see [Cloudmade Tile API](http://developers.cloudmade.com/projects/tiles/documents)
 	 * @example
 ```
@@ -803,6 +850,7 @@ map.add(
 		utils.mixin(this, {
 			map: null,
 			name: '',
+			opacity: 1,
 			tileSize: this.defaultTileSize,
 			url: url,
 			z: this.defaultZ,
@@ -814,7 +862,8 @@ map.add(
 			position: 'absolute',
 			zIndex: this.z,
 			left: 0,
-			top: 0
+			top: 0,
+			opacity: this.opacity
 		});
 
 		this.update();
@@ -1226,6 +1275,7 @@ swift.Map(document.body, {
 
 		// Namespaces
 		utils: utils,
+		detect: detect,
 
 		/**
 		 * Adds new namespace

@@ -16,6 +16,7 @@
 
 		// Namespaces
 		utils: utils,
+		detect: detect,
 
 		/**
 		 * Adds new namespace

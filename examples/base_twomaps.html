@@ -14,8 +14,16 @@
 		<script>
 		jQuery(function($) {
 			$('script', 'body').each(function() {
-				var	_this = $(this);
-				$('<pre><code class="javascript">' + $.trim( _this.html() ) + '</code></pre>')
+				var	_this = $(this),
+					code = $.trim( _this.html() );
+
+				code = code
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;');
+
+				$('<pre><code class="javascript">' + code + '</code></pre>')
 					.insertAfter(this);
 			});
 
@@ -30,26 +38,14 @@
 			<!-- Example code -->
 
 
-<h1>Usage other namespace</h1>
+<h1>Two maps</h1>
 
-<div class="swiftmap" id="swiftmap"></div>
-
-<script type="text/plain">
-swift.alias(window);
-Map('swiftmap');
-</script>
+<div class="swiftmap" id="first"></div>
+<div class="swiftmap" id="second"></div>
 
 <script>
-// or
-swift.alias('sweet');
-sweet.Map('swiftmap');
-</script>
-
-<script type="text/plain">
-// or
-var S = {};
-swift.alias(S);
-S.Map('swiftmap');
+swift.Map('first');
+swift.Map('second');
 </script>
 
 
