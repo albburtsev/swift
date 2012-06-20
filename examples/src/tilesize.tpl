@@ -38,7 +38,7 @@ swift.Map('second')
 
 
 
-<h2>Contracted tiles for retina displays</h2>
+<h2>Contracted tiles for retina display</h2>
 
 <div class="swiftmap" id="third"></div>
 
@@ -51,4 +51,21 @@ var layer3 = swift.TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e40
 swift.Map('third')
 	.empty() 
 	.add(layer3);
+</script>
+
+
+
+
+<h2>Rectangle tiles</h2>
+
+<div class="swiftmap" id="fourth"></div>
+
+<script>
+var layer4 = swift.TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png', {
+	tileSize: swift.Size(128, 256)
+});
+
+swift.Map('fourth')
+	.empty() 
+	.add(layer4);
 </script>

@@ -26,6 +26,7 @@
 			// @tofix
 			if ( this._node && this._node.parentNode ) {
 				this._node.parentNode.removeChild(this._node);
+				this.map = null;
 				return true;
 			}
 			return false;

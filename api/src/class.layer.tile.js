@@ -195,7 +195,9 @@ map.add(
 				}
 			}
 
-			// Rebuild tiles
-			this.rebuild();
+			// Async rebuild tiles
+			utils.async(function() {
+				this.rebuild();
+			}, this);
 		}
 	});

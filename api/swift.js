@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Tue Jun 19 2012 20:15:08 GMT+0400 (MSD)
+ * Date: Wed Jun 20 2012 17:11:54 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -22,6 +22,19 @@
 	var	utils =
 	/** @lends utils */ 
 	{
+		/**
+		 * Delayed call for callback
+		 * @since 0.0.1
+		 * @param {Function} callback Function for delayed call. **Required**
+		 * @param {Object} [context] Object to which the context of the function should be set.
+		 * @returns {Object} Returns namespace utils
+		 */
+		async: function(callback, context) {
+			setTimeout(function() {
+				callback.call(context || window);
+			}, 1);
+			return this;
+		},
 		/**
 		 * Add attributes for given node
 		 * @since 0.0.1
@@ -726,6 +739,7 @@ Point(37.6, 55.8);
 			// @tofix
 			if ( this._node && this._node.parentNode ) {
 				this._node.parentNode.removeChild(this._node);
+				this.map = null;
 				return true;
 			}
 			return false;
@@ -928,8 +942,10 @@ map.add(
 				}
 			}
 
-			// Rebuild tiles
-			this.rebuild();
+			// Async rebuild tiles
+			utils.async(function() {
+				this.rebuild();
+			}, this);
 		}
 	});
 	/**
@@ -1010,10 +1026,7 @@ swift.Map(document.body, {
 		});
 		node.appendChild(this._layers);
 
-		this.add(
-			TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png')
-			//TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png')
-		);
+		this.add( TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png') );
 
 		// Init events handling
 
@@ -1043,6 +1056,7 @@ swift.Map(document.body, {
 			// Invalid instance
 			else
 				throw ErrorInvalidArguments();
+			return this;
 		},
 		/**
 		 * Set bounds of the map, or return bounds

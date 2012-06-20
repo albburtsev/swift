@@ -26,6 +26,16 @@
 				ok( swift.utils, 'Namespace swift.utils exist' );
 				ok( swift.utils.tmpl('a${b}c${d}e', {b: 'b', d: 'd'}) === 'abcde', 'Template rendered ok with simple object data' );
 				ok( swift.utils.tmpl('e${i}', [{i: 2}, {i: 4}]) === 'e2e4', 'Template rendered ok with array objects data' );
+				
+				// Method async
+				ok( swift.utils.async instanceof Function, 'Method swift.utils.async() exist' );
+				
+				var context = { ping: 1 };
+				stop();
+				swift.utils.async(function() {
+					ok( this === context, 'Correctly context argument in callback' );
+					start();
+				}, context);
 			});
 
 			test('Class ProjectionDefault', function() {

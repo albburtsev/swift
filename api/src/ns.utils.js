@@ -8,6 +8,19 @@
 	/** @lends utils */ 
 	{
 		/**
+		 * Delayed call for callback
+		 * @since 0.0.1
+		 * @param {Function} callback Function for delayed call. **Required**
+		 * @param {Object} [context] Object to which the context of the function should be set.
+		 * @returns {Object} Returns namespace utils
+		 */
+		async: function(callback, context) {
+			setTimeout(function() {
+				callback.call(context || window);
+			}, 1);
+			return this;
+		},
+		/**
 		 * Add attributes for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**

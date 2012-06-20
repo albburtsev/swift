@@ -76,10 +76,7 @@ swift.Map(document.body, {
 		});
 		node.appendChild(this._layers);
 
-		this.add(
-			TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png')
-			//TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png')
-		);
+		this.add( TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png') );
 
 		// Init events handling
 
@@ -109,6 +106,7 @@ swift.Map(document.body, {
 			// Invalid instance
 			else
 				throw ErrorInvalidArguments();
+			return this;
 		},
 		/**
 		 * Set bounds of the map, or return bounds
