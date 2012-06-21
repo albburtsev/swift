@@ -1,10 +1,10 @@
 # TODO
 
+ * Do site in branch gh-pages
  * Layer getter interface
- * Refactoring of algo for tile layer add
  * Add class Iterator
  * Rewrite tiles drawing with iterator instance
- 
+
 # DONE
 
  * Normalize indexes for tiles

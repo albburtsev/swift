@@ -35,12 +35,11 @@ swift.Map(document.body, {
 			.reprop(opts, 'zoom')
 			.reprop(opts, 'prj')
 			.mixin(this, {
+				__layers: [],
 				__prj: ProjectionDefault(),
 				__rp: null,
 				__vp: null,
-				background: this.defaultBackground,
-				constrols: [],
-				layers: []
+				background: this.defaultBackground
 			}, opts);
 
 		// Strong validation for zoom and center options
@@ -76,6 +75,8 @@ swift.Map(document.body, {
 		});
 		node.appendChild(this._layers);
 
+		// Add default layer
+		// @tofix
 		this.add( TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png') );
 
 		// Init events handling
@@ -101,10 +102,12 @@ swift.Map(document.body, {
 		 */
 		add: function(instance) {
 			// Add TileLayer instance
-			if ( instance instanceof TileLayer )
+			if ( instance instanceof TileLayer ) {
+				this.__layers.push( instance );
+				this._layers.appendChild(instance._node);
 				instance.update({ map: this });
 			// Invalid instance
-			else
+			} else
 				throw ErrorInvalidArguments();
 			return this;
 		},
@@ -141,9 +144,12 @@ swift.Map(document.body, {
 		 * @returns {Map} Returns map instance
 		 */
 		empty: function() {
-			for (var i = 0; i < this.layers.length; i++)
-				this.layers[i].remove();
-			this.layers.length = 0;
+			var	layers = this.__layers, i;
+
+			for (i = 0; i < layers.length; i++)
+				layers[i].remove();
+			layers.length = 0;
+
 			return this;
 		},
 		/**

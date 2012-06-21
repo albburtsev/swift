@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Wed Jun 20 2012 21:18:12 GMT+0400 (MSD)
+ * Date: Thu Jun 21 2012 19:08:37 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -808,7 +808,6 @@ Point(37.6, 55.8);
 	 * @since 0.0.1
 	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
 	 * @param {Object} [opts] Layer options.
-	 * @param {Map} [opts.map] Map instance.
 	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
 	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
 	 * @param {Number} [opts.z] zIndex of layer, default - 1.
@@ -819,23 +818,14 @@ Point(37.6, 55.8);
 var	map = swift.Map( document.body );
 
 // First case
-TileLayer(
-	'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png',
-	{ map: map }
-);
+var layer = TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png');
+map.add(layer);
 
 // Second case
-TileLayer(
-	function(x, y, z) {
-		return 'http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/'+z+'/'+x+'/'+y+'.png'
-	},
-	{ map: map }
-);
-
-// Third case
-map.add(
-	TileLayer('http://b.tile.cloudmade.com/cac000c14653416ba10e408adc9f25ed/997/256/${z}/${x}/${y}.png')
-);
+var layer = TileLayer(function(x, y, z) {
+	return http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/'+z+'/'+x+'/'+y+'.png
+});
+map.add(layer);
 ```
 	 */
 	function TileLayer(url, opts) {
@@ -848,7 +838,6 @@ map.add(
 			throw ErrorInvalidArguments();
 
 		utils.mixin(this, {
-			map: null,
 			name: '',
 			opacity: 1,
 			tileSize: this.defaultTileSize,
@@ -905,15 +894,7 @@ map.add(
 			tyMin = Math.max(prj.min(tz), tyMin);
 			tyMax = Math.min(prj.max(tz), tyMax);
 
-			/*console.log(
-				'reserveX', reserveX,
-				'reserveY', reserveY,
-				'txMin', txMin,
-				'txMax', txMax,
-				'tyMin', tyMin,
-				'tyMax', tyMax
-			);*/
-
+			// Append all tiles
 			for (tx = txMin; tx <= txMax; tx++) {
 				for (ty = tyMin; ty <= tyMax; ty++) {
 					tile = Tile(tx, ty, tz, {
@@ -967,11 +948,7 @@ map.add(
 		 * @returns {TileLayer} Returns TileLayer instance
 		 */
 		update: function(opts) {
-			opts = opts || {};
-
-			if ( opts.map && opts.map !== this.map ); // todo
-
-			utils.mixin(this, opts);
+			utils.mixin(this, opts || {});
 
 			// Rewrite url option as handler, if given a string
 			if ( !(this.url instanceof Function) ) {
@@ -986,25 +963,8 @@ map.add(
 				};
 			}
 
-			// Add layer node and layer instance to map
-			var	map  = this.map,
-				added = false;
-
-			if ( map instanceof Map ) {
-				for (var i = 0; i < map.layers.length; i++)
-					if ( map.layers[i] === this )
-						added = true;
-
-				if ( !added ) {
-					map.layers.push( this );
-					map._layers.appendChild(this._node);
-				}
-			}
-
 			// Async rebuild tiles
-			utils.async(function() {
-				this.rebuild();
-			}, this);
+			utils.async(this.rebuild, this);
 		}
 	});
 	/**
@@ -1044,12 +1004,11 @@ swift.Map(document.body, {
 			.reprop(opts, 'zoom')
 			.reprop(opts, 'prj')
 			.mixin(this, {
+				__layers: [],
 				__prj: ProjectionDefault(),
 				__rp: null,
 				__vp: null,
-				background: this.defaultBackground,
-				constrols: [],
-				layers: []
+				background: this.defaultBackground
 			}, opts);
 
 		// Strong validation for zoom and center options
@@ -1085,6 +1044,8 @@ swift.Map(document.body, {
 		});
 		node.appendChild(this._layers);
 
+		// Add default layer
+		// @tofix
 		this.add( TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png') );
 
 		// Init events handling
@@ -1110,10 +1071,12 @@ swift.Map(document.body, {
 		 */
 		add: function(instance) {
 			// Add TileLayer instance
-			if ( instance instanceof TileLayer )
+			if ( instance instanceof TileLayer ) {
+				this.__layers.push( instance );
+				this._layers.appendChild(instance._node);
 				instance.update({ map: this });
 			// Invalid instance
-			else
+			} else
 				throw ErrorInvalidArguments();
 			return this;
 		},
@@ -1150,9 +1113,12 @@ swift.Map(document.body, {
 		 * @returns {Map} Returns map instance
 		 */
 		empty: function() {
-			for (var i = 0; i < this.layers.length; i++)
-				this.layers[i].remove();
-			this.layers.length = 0;
+			var	layers = this.__layers, i;
+
+			for (i = 0; i < layers.length; i++)
+				layers[i].remove();
+			layers.length = 0;
+
 			return this;
 		},
 		/**
