@@ -4,7 +4,7 @@
  * 
  * Copyright 2012, Alexander Burtsev
  * Licensed under the MIT
- * Date: Thu Jun 21 2012 19:08:37 GMT+0400 (MSD)
+ * Date: Thu Jun 21 2012 19:31:18 GMT+0400 (MSD)
  */
 
 (function(window, document, undefined) {
@@ -163,6 +163,21 @@
 	/** @lends dom */ 
 	{
 		/**
+		 * Create HTML-element with absolute position
+		 * @since 0.0.1
+		 * @param {Object} [className] Value for attribute "class".
+		 * @param {Object} [styles] Object with styles.
+		 * @returns {HTMLElement} Element
+		 */
+		absDiv: function(className, styles) {
+			styles = utils.mixin({
+				position: 'absolute',
+				left: 0,
+				top: 0
+			}, styles || {});
+			return this.node('', className ? { 'class': className } : {}, styles);
+		},
+		/**
 		 * Add attributes for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -195,7 +210,7 @@
 			return this;
 		},
 		/**
-		 * Create HTML-elements
+		 * Create HTML-element
 		 * @since 0.0.1
 		 * @param {String} [name] Element name, default - 'div'
 		 * @param {Object} [attr] Object with attribites.
@@ -1036,13 +1051,17 @@ swift.Map(document.body, {
 		// Calculate map reference point
 		this.rp(true);
 
-		// Init layers
-		this._layers = dom.node('div', '', {
-			position: 'absolute',
-			left: 0,
-			top: 0
+		// Init layer nodes
+		utils.mixin(this, {
+			_layers: dom.absDiv('swift-layers'), // layers holder
+			_tiles: dom.absDiv('swift-tiles', { zIndex: 10 }), // tile layers holder
+			_vector: dom.absDiv('swift-vector', { zIndex: 100 }), // vector layers holder
+			_markers: dom.absDiv('swift-markers', { zIndex: 1000 }) // marker layers holder
 		});
-		node.appendChild(this._layers);
+		this._layers.appendChild(this._tiles);
+		this._layers.appendChild(this._vector);
+		this._layers.appendChild(this._markers);
+		this._node.appendChild(this._layers);
 
 		// Add default layer
 		// @tofix
@@ -1073,12 +1092,28 @@ swift.Map(document.body, {
 			// Add TileLayer instance
 			if ( instance instanceof TileLayer ) {
 				this.__layers.push( instance );
-				this._layers.appendChild(instance._node);
+				this._tiles.appendChild(instance._node);
 				instance.update({ map: this });
+				return this;
+			}
+
+			// Add MarkerLayer
+			// @todo
+
+			// Add Marker
+			// @todo
+
+			// Add VectorLayer
+			// @todo
+
+			// Add Vector
+			// @todo
+
+			// Add Control
+			// @todo
+
 			// Invalid instance
-			} else
-				throw ErrorInvalidArguments();
-			return this;
+			throw ErrorInvalidArguments();
 		},
 		/**
 		 * Set bounds of the map, or return bounds

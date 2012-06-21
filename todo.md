@@ -1,5 +1,6 @@
 # TODO
 
+ * CSS generator
  * Do site in branch gh-pages
  * Layer getter interface
  * Add class Iterator
@@ -20,3 +21,4 @@
  * Add namespace 'dom' and transfer some methods from 'utils' to 'dom'
  * Add namespace 'detect'
  * Add option 'opacity' for class TileLayer
+ * Add layer holder (_layers) and layer types: _tiles, _markers, _vector

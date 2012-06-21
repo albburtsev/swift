@@ -67,13 +67,17 @@ swift.Map(document.body, {
 		// Calculate map reference point
 		this.rp(true);
 
-		// Init layers
-		this._layers = dom.node('div', '', {
-			position: 'absolute',
-			left: 0,
-			top: 0
+		// Init layer nodes
+		utils.mixin(this, {
+			_layers: dom.absDiv('swift-layers'), // layers holder
+			_tiles: dom.absDiv('swift-tiles', { zIndex: 10 }), // tile layers holder
+			_vector: dom.absDiv('swift-vector', { zIndex: 100 }), // vector layers holder
+			_markers: dom.absDiv('swift-markers', { zIndex: 1000 }) // marker layers holder
 		});
-		node.appendChild(this._layers);
+		this._layers.appendChild(this._tiles);
+		this._layers.appendChild(this._vector);
+		this._layers.appendChild(this._markers);
+		this._node.appendChild(this._layers);
 
 		// Add default layer
 		// @tofix
@@ -104,12 +108,28 @@ swift.Map(document.body, {
 			// Add TileLayer instance
 			if ( instance instanceof TileLayer ) {
 				this.__layers.push( instance );
-				this._layers.appendChild(instance._node);
+				this._tiles.appendChild(instance._node);
 				instance.update({ map: this });
+				return this;
+			}
+
+			// Add MarkerLayer
+			// @todo
+
+			// Add Marker
+			// @todo
+
+			// Add VectorLayer
+			// @todo
+
+			// Add Vector
+			// @todo
+
+			// Add Control
+			// @todo
+
 			// Invalid instance
-			} else
-				throw ErrorInvalidArguments();
-			return this;
+			throw ErrorInvalidArguments();
 		},
 		/**
 		 * Set bounds of the map, or return bounds

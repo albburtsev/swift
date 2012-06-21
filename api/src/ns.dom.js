@@ -8,6 +8,21 @@
 	/** @lends dom */ 
 	{
 		/**
+		 * Create HTML-element with absolute position
+		 * @since 0.0.1
+		 * @param {Object} [className] Value for attribute "class".
+		 * @param {Object} [styles] Object with styles.
+		 * @returns {HTMLElement} Element
+		 */
+		absDiv: function(className, styles) {
+			styles = utils.mixin({
+				position: 'absolute',
+				left: 0,
+				top: 0
+			}, styles || {});
+			return this.node('', className ? { 'class': className } : {}, styles);
+		},
+		/**
 		 * Add attributes for given node
 		 * @since 0.0.1
 		 * @param {HTMLElement} node **Required**
@@ -40,7 +55,7 @@
 			return this;
 		},
 		/**
-		 * Create HTML-elements
+		 * Create HTML-element
 		 * @since 0.0.1
 		 * @param {String} [name] Element name, default - 'div'
 		 * @param {Object} [attr] Object with attribites.
