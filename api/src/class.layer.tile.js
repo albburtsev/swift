@@ -44,8 +44,7 @@ map.add(layer);
 		}, opts);
 
 		// Create layer node
-		this._node = dom.node('div', '', {
-			position: 'absolute',
+		this._node = dom.absDiv(css.get('tiles-layer'), {
 			zIndex: this.z,
 			left: 0,
 			top: 0,

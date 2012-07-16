@@ -69,10 +69,10 @@ swift.Map(document.body, {
 
 		// Init layer nodes
 		utils.mixin(this, {
-			_layers: dom.absDiv('swift-layers'), // layers holder
-			_tiles: dom.absDiv('swift-tiles', { zIndex: 10 }), // tile layers holder
-			_vector: dom.absDiv('swift-vector', { zIndex: 100 }), // vector layers holder
-			_markers: dom.absDiv('swift-markers', { zIndex: 1000 }) // marker layers holder
+			_layers: dom.absDiv( css.get('layers-holder') ), // layers holder
+			_tiles: dom.absDiv( css.get('tiles-holder') ), // tile layers holder
+			_vector: dom.absDiv( css.get('vector-holder') ), // vector layers holder
+			_markers: dom.absDiv( css.get('marker-holder') ) // marker layers holder
 		});
 		this._layers.appendChild(this._tiles);
 		this._layers.appendChild(this._vector);

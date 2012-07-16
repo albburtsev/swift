@@ -18,6 +18,7 @@ module.exports = function(grunt) {
 					'api/src/ns.utils.js',
 					'api/src/ns.dom.js',
 					'api/src/ns.detect.js',
+					'api/src/ns.css.js',
 					'api/src/class.error.js',
 					'api/src/class.event-cover.js',
 					'api/src/class.size.js',

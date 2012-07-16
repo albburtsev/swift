@@ -1,8 +1,8 @@
 # TODO
 
- * CSS generator
  * Do site in branch gh-pages
- * Layer getter interface
+ * MVC pattern for classes with nodes
+ * Layer getter interface for class Map
  * Add class Iterator
  * Rewrite tiles drawing with iterator instance
 
@@ -22,3 +22,4 @@
  * Add namespace 'detect'
  * Add option 'opacity' for class TileLayer
  * Add layer holder (_layers) and layer types: _tiles, _markers, _vector
+ * CSS generator
