@@ -38,27 +38,42 @@
 			<!-- Example code -->
 
 
-<h1>Examples</h1>
+<h1>Noimage tile layer</h1>
 
-<h2 id="base">Base usage</h2>
-<ul>
-	<li><a href="base_tilemap.html">Simple tile map</a></li>
-	<li><a href="base_twomaps.html">Two maps</a></li>
-</ul>
+<p>Tile is a DIV element with image background.</p>
 
-<h2 id="feature">Features</h2>
-<ul>
-	<li><a href="feature_alias.html">Usage other namespace</a></li>
-	<li><a href="feature_detect.html">Usage namespace <code>swift.detect</code></a></li>
-</ul>
+<div class="swiftmap" id="swiftmap"></div>
 
-<h2 id="tiles">Tile layers</h2>
-<ul>
-	<li><a href="tiles_anothertiles.html">Another tile layer</a></li>
-	<li><a href="tiles_tilesize.html">Another tile size</a></li>
-	<li><a href="tiles_twotilelayers.html">Two tile layers</a></li>
-	<li><a href="tiles_noimagetiles.html">Noimage tile layer</a></li>
-</ul>
+<script>
+var layer = swift.TileLayer('', {
+	/**
+	 * Return tile node
+	 * @param {Tile} tile Tile instance.
+	 * @param {Object} styles Styles for tile position.
+	 * @returns {HTMLElement} Tile node
+	 */
+	tileNode: function(tile, styles) {
+		var	node = document.createElement('div'),
+			bgUrl = this.url(tile.tnx, tile.tny, tile.tz);
+
+		node.style.position = styles.position;
+		node.style.top = styles.top;
+		node.style.left = styles.left;
+		node.style.width = this.tileSize.width() + 'px';
+		node.style.height = this.tileSize.height() + 'px';
+		node.style.background = 'no-repeat url(' + bgUrl + ') 0 0';
+		node.style.border = '1px solid #333';
+
+		node.innerHTML = 'DIV';
+
+		return node;
+	}
+});
+
+swift.Map('swiftmap')
+	.empty()
+	.add(layer);
+</script>
 
 
 			<!-- /Example code -->

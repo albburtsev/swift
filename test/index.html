@@ -145,8 +145,6 @@
 				ok( new swift.TileLayer({ url: url }) instanceof swift.TileLayer, 'Constructor successful called with "new"' );
 				ok( swift.TileLayer({ url: url }) instanceof swift.TileLayer, 'Constructor successful called without "new"' );
 				ok( swift.TileLayer({ url: url }) instanceof swift.Layer, 'Successful class Layer inherits' );
-				
-				raises(function() { swift.TileLayer(); }, 'TileLayer call without parameter node throw error, ok');
 			});
 
 			test('Class Map', function() {

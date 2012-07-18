@@ -51,7 +51,7 @@ swift.Map(document.body, {
 			node = document.getElementById(node);
 
 		if ( node.nodeType !== 1 )
-			throw ErrorInvalidArguments();
+			throw ErrorInvalidHTMLElement();
 
 		var	nodeStylePosition = utils.computed(node, 'position');
 		dom.css(node, {
@@ -81,7 +81,7 @@ swift.Map(document.body, {
 
 		// Add default layer
 		// @tofix
-		this.add( TileLayer('http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png') );
+		this.add( TileLayer() );
 
 		// Init events handling
 

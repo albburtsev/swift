@@ -3,12 +3,13 @@
 	 * @class
 	 * @name TileLayer
 	 * @since 0.0.1
-	 * @param {String|Function} url URL template or URL handler for getting tile URL.  **Required**
+	 * @param {String|Function} [url] URL template or URL handler for getting tile URL.  **Required**
 	 * @param {Object} [opts] Layer options.
-	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
-	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
 	 * @param {Number} [opts.z] zIndex of layer, default - 1.
 	 * @param {Number} [opts.opacity] Layer opacity [0..1], default - 1.
+	 * @param {Number} [opts.zoomShift] Shift for zoom level of tile, needed for changing tile size, default - 0.
+	 * @param {Size} [opts.tileSize] Size of tile, default - swift.Size(256, 256).
+	 * @param {Function} [opts.tileNode] Returns HTMLElement for tile. Getting two arguments: Tile instance and styles for position.
 	 * @see [Cloudmade Tile API](http://developers.cloudmade.com/projects/tiles/documents)
 	 * @example
 ```
@@ -31,14 +32,12 @@ map.add(layer);
 
 		// Handle options
 		opts = opts || {};
-		if ( !url )
-			throw ErrorInvalidArguments();
 
 		utils.mixin(this, {
 			name: '',
 			opacity: 1,
 			tileSize: this.defaultTileSize,
-			url: url,
+			url: url || this.defaultUrl,
 			z: this.defaultZ,
 			zoomShift: 0
 		}, opts);
@@ -59,6 +58,7 @@ map.add(layer);
 	{
 		defaultZ: 1,
 		defaultTileSize: new Size(256, 256),
+		defaultUrl: 'http://api.tiles.mapbox.com/v3/mapbox.mapbox-streets/${z}/${x}/${y}.png',
 		
 		/**
 		 * Rebuild tiles in layer
@@ -84,7 +84,7 @@ map.add(layer);
 				tyMin = rpt.ty - reserveY, // Minimal tile y-index
 				tyMax = rpt.ty + reserveY, // Maximum tile y-index
 				tx, ty, tz = rpt.tz,
-				tile;
+				tile, tileNode;
 
 			// Do not repeat for Y-direction
 			tyMin = Math.max(prj.min(tz), tyMin);
@@ -97,16 +97,21 @@ map.add(layer);
 						tnx: prj.normalize(tx, tz),
 						tny: prj.normalize(ty, tz)
 					});
-					this._node.appendChild( this.tileNode(tile, {
+					tileNode = this.tileNode(tile, {
 						position: 'absolute',
 						top: (rptTop + (ty - rpt.ty) * tileHeight) + 'px',
 						left: (rptLeft + (tx - rpt.tx) * tileWidth) + 'px'
-					}) );
+					});
+
+					if ( !tileNode || tileNode.nodeType !== 1 )
+						throw ErrorInvalidHTMLElement();
+
+					this._node.appendChild(tileNode);
 				}
 			}
 
 			// Memory leak fix
-			rpt = prj = vp = vpc = tile = null;
+			rpt = prj = vp = vpc = tile = tileNode = null;
 		},
 		/**
 		 * Returns layer reference point

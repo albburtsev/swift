@@ -17,4 +17,5 @@
 	<li><a href="tiles_anothertiles.html">Another tile layer</a></li>
 	<li><a href="tiles_tilesize.html">Another tile size</a></li>
 	<li><a href="tiles_twotilelayers.html">Two tile layers</a></li>
+	<li><a href="tiles_noimagetiles.html">Noimage tile layer</a></li>
 </ul>

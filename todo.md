@@ -1,8 +1,10 @@
 # TODO
-
+ 
+ * Layer getter interface for class Map
+ * Add methods zoom() for class Map
+ * Add methods center() for class Map
  * Do site in branch gh-pages
  * MVC pattern for classes with nodes
- * Layer getter interface for class Map
  * Add class Iterator
  * Rewrite tiles drawing with iterator instance
 
@@ -23,3 +25,4 @@
  * Add option 'opacity' for class TileLayer
  * Add layer holder (_layers) and layer types: _tiles, _markers, _vector
  * CSS generator
+ * Noimage tile layer

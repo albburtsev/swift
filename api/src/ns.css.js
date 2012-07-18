@@ -30,6 +30,7 @@
 		 * Create CSS text
 		 * @since 0.0.1
 		 * @returns {String} CSS string
+		 * @ignore
 		 */
 		gen: function() {
 			var	cssText = '',
@@ -50,6 +51,7 @@
 		 * Return selector with prefix for selector key
 		 * @since 0.0.1
 		 * @returns {String} Selector
+		 * @ignore
 		 */
 		get: function(selector) {
 			return this.source[selector] ? this.prefix + selector : selector;
@@ -58,6 +60,7 @@
 		 * Added <style> HTMLElement with swift selectors
 		 * @since 0.0.1
 		 * @returns {Undefined}
+		 * @ignore
 		 */
 		init: function() {
 			var	parent = document.getElementsByTagName('head')[0] || document.body,
